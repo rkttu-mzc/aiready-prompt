@@ -1,0 +1,55 @@
+﻿@inherits LayoutComponentBase
+
+<div class="app-layout">
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="/" class="nav-brand">
+                    <span class="brand-icon">🚀</span>
+                    <span class="brand-text">MEGAZONE AIR Prompt</span>
+                </a>
+                
+                <div class="nav-menu">
+                    <a href="/" class="nav-link">홈</a>
+                    <a href="/prompts" class="nav-link">프롬프트</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        @Body
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>MEGAZONE AIR Prompt</h4>
+                    <p>AI 시대를 위한 최고의 프롬프트 컬렉션</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>링크</h4>
+                    <ul class="footer-links">
+                        <li><a href="/">홈</a></li>
+                        <li><a href="/prompts">프롬프트</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>연락처</h4>
+                    <p>MEGAZONE AIR Team</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year MEGAZONE AIR. All rights reserved.</p>
+                <p>Made with ❤️ for AI enthusiasts</p>
+            </div>
+        </div>
+    </footer>
+</div>

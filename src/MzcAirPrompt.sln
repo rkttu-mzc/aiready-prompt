@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36202.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MzcAirPrompt", "MzcAirPrompt\MzcAirPrompt.csproj", "{9706DF2A-5991-4EEF-B1D3-230332F55D5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|x64.Build.0 = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Debug|x86.Build.0 = Debug|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|x64.ActiveCfg = Release|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|x64.Build.0 = Release|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|x86.ActiveCfg = Release|Any CPU
+		{9706DF2A-5991-4EEF-B1D3-230332F55D5B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7754A2C-24E4-415C-A39B-D27CFF2DAC04}
+	EndGlobalSection
+EndGlobal

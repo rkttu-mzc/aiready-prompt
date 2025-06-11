@@ -1,0 +1,26 @@
+[
+    {
+        "relPath": "business",
+        "fileName": "business-strategy.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "marketing-strategy.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "api-docs-generator.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "code-reviewer.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "language-tutor.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "writing-assistant.md"
+    }
+]

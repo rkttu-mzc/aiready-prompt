@@ -1,0 +1,22 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-brand">
+            <span class="brand-icon">🚀</span>
+            <span class="brand-text">MEGAZONE AIR Prompt</span>
+        </a>
+        
+        <div class="nav-menu">
+            <NavLink href="/" class="nav-link" Match="NavLinkMatch.All">홈</NavLink>
+            <NavLink href="/prompts" class="nav-link">프롬프트</NavLink>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .nav-link.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white !important;
+    }
+</style>

@@ -1,0 +1,300 @@
+@page "/prompts"
+@inject PromptService PromptService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<PageTitle>프롬프트 목록 - MEGAZONE AIR Prompt</PageTitle>
+
+<div class="prompt-gallery">
+    <header class="gallery-header">
+        <h1 class="gallery-title">📚 프롬프트 목록</h1>
+        <p class="gallery-subtitle">모든 AI 프롬프트를 한눈에 확인하세요</p>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <input @bind="searchTerm" @oninput="OnSearchInput" 
+                       placeholder="프롬프트 검색..." class="search-input" />
+                <button class="search-btn" @onclick="SearchPrompts">
+                    🔍
+                </button>
+            </div>
+              <div class="filter-section">
+                <select @bind="selectedCategory" class="category-filter">
+                    <option value="">모든 카테고리</option>
+                    @if (categories != null)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    }
+                </select>
+                  <div class="favorite-filter">
+                    <label class="favorite-toggle">
+                        <input type="checkbox" @bind="ShowFavoritesOnly" />
+                        <span class="checkmark">💖</span>
+                        <span class="label-text">즐겨찾기만 보기</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="gallery-content">
+        @if (isLoading)
+        {
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>프롬프트를 불러오는 중...</p>
+            </div>
+        }
+        else if (displayedPrompts?.Any() == true)
+        {
+            <div class="prompts-stats">
+                <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>
+            </div>
+              <div class="prompts-grid">
+                @foreach (var prompt in displayedPrompts)
+                {
+                    <PromptCard Prompt="prompt" OnCardClick="ViewPrompt" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-results">
+                <div class="no-results-icon">📝</div>
+                <h3>@(string.IsNullOrEmpty(searchTerm) ? "프롬프트가 없습니다" : "검색 결과가 없습니다")</h3>
+                <p>@(string.IsNullOrEmpty(searchTerm) ? "프롬프트를 추가해주세요." : "다른 키워드로 검색해보세요.")</p>
+            </div>
+        }
+    </main>
+</div>
+
+<PromptModal Prompt="selectedPrompt" 
+             OnClose="CloseModal"
+             OnCopyToClipboard="CopyToClipboard"
+             OnToggleFavorite="ToggleFavorite" />
+
+@code
+{
+    private List<PromptItem>? allPrompts;
+    private List<PromptItem>? displayedPrompts;
+    private List<string>? categories;
+    private string searchTerm = "";
+    private string _selectedCategory = "";
+    private bool showFavoritesOnly = false;
+    private bool isLoading = true;
+    private PromptItem? selectedPrompt; private string selectedCategory
+    {
+        get => _selectedCategory;
+        set
+        {
+            if (_selectedCategory != value)
+            {
+                _selectedCategory = value;
+                ApplyFilters();
+            }
+        }
+    }
+
+    private bool ShowFavoritesOnly
+    {
+        get => showFavoritesOnly;
+        set
+        {
+            if (showFavoritesOnly != value)
+            {
+                showFavoritesOnly = value;
+                ApplyFilters();
+            }
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        // URL 파라미터 처리
+        var uri = new Uri(Navigation.Uri);
+        var query = uri.Query;
+
+        if (!string.IsNullOrEmpty(query))
+        {
+            var queryParams = query.TrimStart('?').Split('&');
+            foreach (var param in queryParams)
+            {
+                var keyValue = param.Split('=');
+                if (keyValue.Length == 2)
+                {
+                    var key = Uri.UnescapeDataString(keyValue[0]);
+                    var value = Uri.UnescapeDataString(keyValue[1]);
+
+                    if (key == "search")
+                    {
+                        searchTerm = value;
+                    }
+                    else if (key == "category")
+                    {
+                        _selectedCategory = value;
+                    }
+                }
+            }
+        }
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            allPrompts = await PromptService.GetAllPromptsAsync();
+            categories = await PromptService.GetCategoriesAsync();
+
+            // 로컬 스토리지에서 즐겨찾기 상태 복원
+            await LoadFavoritesFromStorage();
+
+            // 필터 적용
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+            allPrompts = new List<PromptItem>();
+            displayedPrompts = new List<PromptItem>();
+            categories = new List<string>();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        ApplyFilters();
+    }
+
+    private void SearchPrompts()
+    {
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (allPrompts == null) return;
+
+        var filtered = allPrompts.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filtered = filtered.Where(p =>
+                p.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Tags.Any(t => t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            filtered = filtered.Where(p => p.Category.Equals(selectedCategory, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (showFavoritesOnly)
+        {
+            filtered = filtered.Where(p => p.IsFavorite);
+        }
+
+        displayedPrompts = filtered.OrderByDescending(p => p.UpdatedDate).ToList();
+        StateHasChanged();
+    }
+
+    private void ViewPrompt(string promptId)
+    {
+        selectedPrompt = allPrompts?.FirstOrDefault(p => p.Id == promptId);
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        selectedPrompt = null;
+        StateHasChanged();
+    }
+
+    private async Task CopyToClipboard(string content)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
+            // 간단한 알림을 위해 콘솔에 로그 출력 (실제로는 토스트 메시지 등을 사용할 수 있습니다)
+            Console.WriteLine("프롬프트가 클립보드에 복사되었습니다.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"클립보드 복사 실패: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleFavorite(PromptItem prompt)
+    {
+        prompt.IsFavorite = !prompt.IsFavorite;
+
+        // 로컬 스토리지에 즐겨찾기 상태 저장
+        await SaveFavoritesToStorage();
+
+        // 현재 즐겨찾기 필터가 활성화되어 있으면 표시 목록 업데이트
+        if (showFavoritesOnly)
+        {
+            ApplyFilters();
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadFavoritesFromStorage()
+    {
+        try
+        {
+            if (allPrompts == null) return;
+
+            var favoritesJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "favorites");
+            if (!string.IsNullOrEmpty(favoritesJson))
+            {
+                var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
+                if (favoriteIds != null)
+                {
+                    foreach (var prompt in allPrompts)
+                    {
+                        prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
+        }
+    }
+
+    private async Task SaveFavoritesToStorage()
+    {
+        try
+        {
+            if (allPrompts == null) return;
+
+            var favoriteIds = allPrompts.Where(p => p.IsFavorite).Select(p => p.Id).ToList();
+            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "favorites", favoritesJson);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
+        }
+    }
+}

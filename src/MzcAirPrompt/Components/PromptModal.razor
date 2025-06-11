@@ -1,0 +1,48 @@
+@using MzcAirPrompt.Models
+@using Microsoft.JSInterop
+
+@if (Prompt != null)
+{
+    <div class="modal-overlay" @onclick="() => OnClose?.Invoke()">
+        <div class="modal-content" @onclick:stopPropagation="true">            <div class="modal-header">
+                <h2>@Prompt.Title</h2>
+                <button class="close-btn" @onclick="() => OnClose?.Invoke()">✕</button>
+            </div>              <div class="modal-body">
+                <div class="prompt-meta">
+                    <span class="category-badge">@Prompt.Category</span>
+                    <span class="author-info">by @Prompt.Author</span>
+                    <span class="date-info">@Prompt.UpdatedDate.ToString("yyyy년 MM월 dd일")</span>
+                </div>
+                
+                <div class="prompt-tags-full">
+                    @foreach (var tag in Prompt.Tags)
+                    {
+                        <span class="tag">@tag</span>
+                    }
+                </div>
+                
+                <p class="prompt-description-full">@Prompt.Description</p>
+                
+                <div class="modal-actions">
+                    <button class="copy-btn" @onclick="async () => await (OnCopyToClipboard?.Invoke(Prompt.Content) ?? Task.CompletedTask)">
+                        📋 프롬프트 복사
+                    </button>
+                    <button class="favorite-btn" @onclick="async () => await (OnToggleFavorite?.Invoke(Prompt) ?? Task.CompletedTask)">
+                        @(Prompt.IsFavorite ? "💖" : "🤍") 즐겨찾기
+                    </button>
+                </div>
+                
+                <div class="prompt-content">
+                    <pre><code>@Prompt.Content</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public PromptItem? Prompt { get; set; }
+    [Parameter] public Action? OnClose { get; set; }
+    [Parameter] public Func<string, Task>? OnCopyToClipboard { get; set; }
+    [Parameter] public Func<PromptItem, Task>? OnToggleFavorite { get; set; }
+}
