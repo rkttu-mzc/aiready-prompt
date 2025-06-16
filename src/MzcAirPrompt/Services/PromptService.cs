@@ -400,4 +400,55 @@ public class PromptService
         }
         return _manifestFileInfos.Count(f => f.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
     }
+
+    public async IAsyncEnumerable<PromptItem> GetPromptsAsyncEnumerable()
+    {
+        if (!_manifestLoaded)
+        {
+            await LoadManifestAsync();
+        }
+
+        foreach (var fileInfo in _manifestFileInfos)
+        {
+            // 이미 로드된 프롬프트가 있다면 재사용
+            var promptId = Path.GetFileNameWithoutExtension(fileInfo.FileName);
+            if (_loadedPrompts.ContainsKey(promptId))
+            {
+                yield return _loadedPrompts[promptId];
+                continue;
+            }
+
+            var prompt = await LoadSinglePromptAsync(fileInfo);
+            if (prompt != null)
+            {
+                _loadedPrompts[promptId] = prompt;
+                yield return prompt;
+            }
+        }
+    }
+
+    public async IAsyncEnumerable<PromptItem> GetPromptsByCategoryAsyncEnumerable(string category)
+    {
+        await foreach (var prompt in GetPromptsAsyncEnumerable())
+        {
+            if (prompt.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+            {
+                yield return prompt;
+            }
+        }
+    }
+
+    public async IAsyncEnumerable<PromptItem> SearchPromptsAsyncEnumerable(string searchTerm)
+    {
+        await foreach (var prompt in GetPromptsAsyncEnumerable())
+        {
+            if (prompt.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                prompt.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                prompt.Content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                prompt.Tags.Any(t => t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+            {
+                yield return prompt;
+            }
+        }
+    }
 }

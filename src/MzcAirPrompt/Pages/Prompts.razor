@@ -2,6 +2,7 @@
 @inject PromptService PromptService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <PageTitle>프롬프트 목록 - MEGAZONE AIR Prompt</PageTitle>
 
@@ -47,11 +48,14 @@
                 <div class="spinner"></div>
                 <p>프롬프트를 불러오는 중...</p>
             </div>
-        }
-        else if (displayedPrompts?.Any() == true)
+        }        else if (displayedPrompts?.Any() == true)
         {
             <div class="prompts-stats">
                 <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>
+                @if (isLoadingMore)
+                {
+                    <span class="loading-more">더 불러오는 중...</span>
+                }
             </div>
               <div class="prompts-grid">
                 @foreach (var prompt in displayedPrompts)
@@ -79,13 +83,15 @@
 @code
 {
     private List<PromptItem>? allPrompts;
-    private List<PromptItem>? displayedPrompts;
+    private List<PromptItem> displayedPrompts = new();
     private List<string>? categories;
     private string searchTerm = "";
     private string _selectedCategory = "";
     private bool showFavoritesOnly = false;
     private bool isLoading = true;
-    private PromptItem? selectedPrompt; private string selectedCategory
+    private bool isLoadingMore = false;
+    private PromptItem? selectedPrompt;
+    private CancellationTokenSource? _loadingCancellationTokenSource;private string selectedCategory
     {
         get => _selectedCategory;
         set
@@ -160,25 +166,45 @@
         {
             Console.WriteLine($"Error loading initial data: {ex.Message}");
         }
-    }
-
-    private async Task LoadData()
+    }    private async Task LoadData()
     {
         isLoading = true;
         StateHasChanged();
 
         try
         {
-            allPrompts = await PromptService.GetAllPromptsAsync();
+            // 이전 로딩 작업이 있다면 취소
+            _loadingCancellationTokenSource?.Cancel();
+            _loadingCancellationTokenSource = new CancellationTokenSource();
+            
+            displayedPrompts.Clear();
+            allPrompts = new List<PromptItem>();
+
+            // IAsyncEnumerable을 사용하여 동적으로 프롬프트 로드
+            await foreach (var prompt in PromptService.GetPromptsAsyncEnumerable().WithCancellation(_loadingCancellationTokenSource.Token))
+            {
+                allPrompts.Add(prompt);
+                
+                // 로컬 스토리지에서 즐겨찾기 상태 복원
+                await RestoreFavoriteState(prompt);
+
+                // 필터 조건에 맞는지 확인하고 표시 목록에 추가
+                if (ShouldDisplayPrompt(prompt))
+                {
+                    displayedPrompts.Add(prompt);
+                    StateHasChanged(); // UI 업데이트하여 프롬프트가 하나씩 나타나도록
+                }
+            }
             
             // 전체 카테고리 목록을 다시 가져와서 업데이트 (실제 프롬프트에서 추출한 카테고리 포함)
             categories = await PromptService.GetCategoriesAsync();
 
-            // 로컬 스토리지에서 즐겨찾기 상태 복원
-            await LoadFavoritesFromStorage();
-
-            // 필터 적용
-            ApplyFilters();
+            // 최종 정렬 적용
+            ApplyFinalSorting();
+        }
+        catch (OperationCanceledException)
+        {
+            // 취소된 경우 무시
         }
         catch (Exception ex)
         {
@@ -192,20 +218,27 @@
             isLoading = false;
             StateHasChanged();
         }
-    }
-
-    private void OnSearchInput(ChangeEventArgs e)
+    }    private void OnSearchInput(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? "";
-        ApplyFilters();
+        
+        // 기존 로딩 취소
+        _loadingCancellationTokenSource?.Cancel();
+        
+        // 검색어가 변경되면 즉시 재필터링
+        if (allPrompts != null)
+        {
+            ApplyFilters();
+        }
     }
 
     private void SearchPrompts()
     {
-        ApplyFilters();
-    }
-
-    private void ApplyFilters()
+        if (allPrompts != null)
+        {
+            ApplyFilters();
+        }
+    }private void ApplyFilters()
     {
         if (allPrompts == null) return;
 
@@ -233,6 +266,60 @@
 
         displayedPrompts = filtered.OrderByDescending(p => p.UpdatedDate).ToList();
         StateHasChanged();
+    }
+
+    private bool ShouldDisplayPrompt(PromptItem prompt)
+    {
+        // 검색어 필터
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var matches = prompt.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                         prompt.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                         prompt.Content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                         prompt.Tags.Any(t => t.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            if (!matches) return false;
+        }
+
+        // 카테고리 필터
+        if (!string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            if (!prompt.Category.Equals(selectedCategory, StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        // 즐겨찾기 필터
+        if (showFavoritesOnly)
+        {
+            if (!prompt.IsFavorite) return false;
+        }
+
+        return true;
+    }
+
+    private void ApplyFinalSorting()
+    {
+        displayedPrompts = displayedPrompts.OrderByDescending(p => p.UpdatedDate).ToList();
+        StateHasChanged();
+    }
+
+    private async Task RestoreFavoriteState(PromptItem prompt)
+    {
+        try
+        {
+            var favoritesJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "favorites");
+            if (!string.IsNullOrEmpty(favoritesJson))
+            {
+                var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
+                if (favoriteIds != null)
+                {
+                    prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to restore favorite state for {prompt.Id}: {ex.Message}");
+        }
     }
 
     private void ViewPrompt(string promptId)
@@ -361,13 +448,18 @@
             {
                 // 프롬프트를 찾지 못한 경우 전체 목록으로 이동
                 await LoadData();
-            }
-        }
+            }        }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading specific prompt: {ex.Message}");
             // 오류 발생 시 전체 목록으로 이동
             await LoadData();
         }
+    }
+
+    public void Dispose()
+    {
+        _loadingCancellationTokenSource?.Cancel();
+        _loadingCancellationTokenSource?.Dispose();
     }
 }
