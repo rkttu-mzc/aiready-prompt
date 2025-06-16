@@ -1,11 +1,187 @@
 [
     {
         "relPath": "business",
+        "fileName": "ad-copy-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "affinity-diagram.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "approval-document.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "blog-content-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "brainstorming.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "business-idea-generation.md"
+    },
+    {
+        "relPath": "business",
         "fileName": "business-strategy.md"
     },
     {
         "relPath": "business",
+        "fileName": "company-regulations.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "comparison-scoring.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "comparison-table.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "email-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "evaluation-criteria.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "event-planning.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "faq-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "general-document-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "idea-combination.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "idea-creation.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "marketing-strategy-analysis.md"
+    },
+    {
+        "relPath": "business",
         "fileName": "marketing-strategy.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "meeting-agenda.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "needs-insight-exploration.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "newsletter-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "opinion-analysis.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "persona-creation.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "perspective-derivation.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "potential-needs-analysis.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "presentation-proposal.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "presentation-template.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "process-consultation.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "product-manual-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "promotional-materials.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "proposal-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "pros-cons-analysis.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "report-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "risk-management.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "schedule-management.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "speech-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "survey-creation.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "thinking-expansion.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "translation-request.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "web-content-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "x-market-research.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "x-press-release-catchphrase.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "x-sns-marketing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "x-user-interview.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "x-website-content.md"
     },
     {
         "relPath": "development",
@@ -13,11 +189,243 @@
     },
     {
         "relPath": "development",
+        "fileName": "chart-format-suggestion.md"
+    },
+    {
+        "relPath": "development",
         "fileName": "code-reviewer.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "data-analysis.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "error-checking.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "error-troubleshooting.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "excel-functions.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "excel-vba-macro.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "font-recommendation.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "it-tool-comparison.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "it-tool-recommendation.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "keyphrase-extraction.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "list-numbering.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "pdf-summary.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "sentiment-analysis.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "simple-game-coding.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "text-classification.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "text-editing.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "text-summary.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "translation.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "video-summary.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "website-summary.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "whimsical-business-diagram.md"
+    },
+    {
+        "relPath": "development",
+        "fileName": "whimsical-mindmap.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "business-learning-advice.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "career-consulting.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "classification-tagging.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "concept-explanation.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "difficult-sentence-summary.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "english-cv-writing.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "icebreaker-activities.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "information-collection.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "information-search.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "interview-practice.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "job-posting.md"
     },
     {
         "relPath": "education",
         "fileName": "language-tutor.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "latest-news-collection.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "mentor-consultation.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "one-on-one-meeting.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "performance-feedback.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "problem-generation.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "resume-writing.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "training-planning.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "training-system.md"
+    },
+    {
+        "relPath": "education",
+        "fileName": "workshop-facilitation.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "ai-image-prompt.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "comfort-chat.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "email-correction.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "encouragement.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "friendly-chat.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "image-creation.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "meeting-notes.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "presentation-content.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "presentation-qa.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "presentation-script.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "style-conversion.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "video-generation.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "video-script.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "video-structure.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "video-title.md"
+    },
+    {
+        "relPath": "writing",
+        "fileName": "word-document.md"
     },
     {
         "relPath": "writing",
