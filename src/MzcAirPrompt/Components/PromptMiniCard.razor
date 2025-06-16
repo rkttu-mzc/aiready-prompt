@@ -2,11 +2,14 @@
 
 <div class="prompt-card-mini" @onclick="() => OnCardClick?.Invoke(Prompt.Id)">
     <div class="prompt-header">
-        <h4>@Prompt.Title</h4>
-        <div class="header-actions">
-            <span class="category-badge">@Prompt.Category</span>            <button class="favorite-btn-mini" @onclick:stopPropagation="true" @onclick="async () => await (OnToggleFavorite?.Invoke(Prompt) ?? Task.CompletedTask)">
-                @(Prompt.IsFavorite ? "💖" : "🤍")
-            </button>
+        <h4>@Prompt.Title</h4>        <div class="header-actions">
+            <span class="category-badge">@Prompt.Category</span>
+            @if (OnToggleFavorite != null)
+            {
+                <button class="favorite-btn-mini" @onclick:stopPropagation="true" @onclick="async () => await (OnToggleFavorite?.Invoke(Prompt) ?? Task.CompletedTask)">
+                    @(Prompt.IsFavorite ? "💖" : "🤍")
+                </button>
+            }
         </div>
     </div>
     <p class="prompt-description-mini">@Prompt.Description</p>

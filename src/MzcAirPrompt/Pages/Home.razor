@@ -98,53 +98,49 @@
     @if (recentPrompts?.Any() == true)
     {        <section class="recent-section">
             <h2 class="section-title">최근 업데이트된 프롬프트</h2>
-            <div class="recent-prompts-grid">
-                @foreach (var prompt in recentPrompts.Take(3))
+            <div class="recent-prompts-grid">                @foreach (var prompt in recentPrompts.Take(3))
                 {
                     <PromptMiniCard Prompt="prompt" 
-                                    OnCardClick="ViewPrompt" 
-                                    OnToggleFavorite="ToggleFavorite" />
-                }
-            </div>
+                                    OnCardClick="ViewPrompt" />
+                }</div>
         </section>
     }
 </div>
 
-<!-- Prompt Modal -->
-<PromptModal Prompt="selectedPrompt" 
-             OnClose="CloseModal"
-             OnCopyToClipboard="CopyToClipboard"
-             OnToggleFavorite="ToggleFavorite" />
-
 @code {
-    private List<PromptItem>? allPrompts;
     private List<PromptItem>? recentPrompts;
     private List<string>? categories;
     private string searchTerm = "";
     private int totalPrompts = 0;
     private int totalCategories = 0;
-    private int totalTags = 0;
-    private PromptItem? selectedPrompt;
-
-    protected override async Task OnInitializedAsync()
+    private int totalTags = 0;protected override async Task OnInitializedAsync()
     {
+        await LoadQuickStats();
         await LoadData();
+    }
+
+    private async Task LoadQuickStats()
+    {
+        try
+        {
+            // 빠른 통계 정보 먼저 로드 (매니페스트만 사용)
+            totalPrompts = await PromptService.GetPromptCountAsync();
+            totalCategories = await PromptService.GetCategoryCountAsync();
+            StateHasChanged(); // UI 업데이트
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading quick stats: {ex.Message}");
+        }
     }    private async Task LoadData()
     {
         try
         {
-            allPrompts = await PromptService.GetAllPromptsAsync();
             categories = await PromptService.GetCategoriesAsync();
-            var tags = await PromptService.GetTagsAsync();
 
-            totalPrompts = allPrompts?.Count ?? 0;
-            totalCategories = categories?.Count ?? 0;
-            totalTags = tags?.Count ?? 0;
-
-            // 로컬 스토리지에서 즐겨찾기 상태 복원
-            await LoadFavoritesFromStorage();
-
-            recentPrompts = allPrompts?
+            // 최근 프롬프트는 메타데이터만 로드하여 성능 최적화
+            var allPromptMetadata = await PromptService.GetAllPromptMetadataAsync();
+            recentPrompts = allPromptMetadata?
                 .OrderByDescending(p => p.UpdatedDate)
                 .Take(6)
                 .ToList();
@@ -155,7 +151,9 @@
         }
 
         StateHasChanged();
-    }private void OnSearchKeyPress(KeyboardEventArgs e)
+    }
+    
+    private void OnSearchKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
@@ -179,81 +177,10 @@
     private void ViewAllPrompts()
     {
         Navigation.NavigateTo("/prompts");
-    }
-
-    private void ViewPrompt(string promptId)
+    }    private void ViewPrompt(string promptId)
     {
-        selectedPrompt = allPrompts?.FirstOrDefault(p => p.Id == promptId);
-        StateHasChanged();
-    }
-
-    private void CloseModal()
-    {
-        selectedPrompt = null;
-        StateHasChanged();
-    }
-    
-    private async Task CopyToClipboard(string content)
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to copy to clipboard: {ex.Message}");
-        }
-    }
-    
-    private async Task ToggleFavorite(PromptItem prompt)
-    {
-        prompt.IsFavorite = !prompt.IsFavorite;
-        
-        // 로컬 스토리지에 즐겨찾기 상태 저장
-        await SaveFavoritesToStorage();
-        
-        StateHasChanged();
-    }
-
-    private async Task LoadFavoritesFromStorage()
-    {
-        try
-        {
-            if (allPrompts == null) return;
-
-            var favoritesJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "favorites");
-            if (!string.IsNullOrEmpty(favoritesJson))
-            {
-                var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
-                if (favoriteIds != null)
-                {
-                    foreach (var prompt in allPrompts)
-                    {
-                        prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
-        }
-    }
-
-    private async Task SaveFavoritesToStorage()
-    {
-        try
-        {
-            if (allPrompts == null) return;
-
-            var favoriteIds = allPrompts.Where(p => p.IsFavorite).Select(p => p.Id).ToList();
-            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds);
-            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "favorites", favoritesJson);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
-        }
+        // Prompts 페이지로 이동하면서 특정 프롬프트를 바로 열도록 함
+        Navigation.NavigateTo($"/prompts?promptId={Uri.EscapeDataString(promptId)}");
     }
 
     private string GetCategoryIcon(string category)
@@ -268,10 +195,9 @@
             "design" or "디자인" => "🎨",
             _ => "📝"
         };
-    }
-
-    private int GetCategoryCount(string category)
+    }    private int GetCategoryCount(string category)
     {
-        return allPrompts?.Count(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase)) ?? 0;
+        // 매니페스트 데이터에서 카테고리별 개수를 가져오도록 수정
+        return PromptService.GetCategoryCountAsync(category).Result;
     }
 }

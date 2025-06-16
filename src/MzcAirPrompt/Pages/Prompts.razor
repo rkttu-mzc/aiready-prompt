@@ -109,8 +109,7 @@
                 ApplyFilters();
             }
         }
-    }
-    protected override async Task OnInitializedAsync()
+    }    protected override async Task OnInitializedAsync()
     {
         // URL 파라미터 처리
         var uri = new Uri(Navigation.Uri);
@@ -135,11 +134,32 @@
                     {
                         _selectedCategory = value;
                     }
+                    else if (key == "promptId")
+                    {
+                        // 특정 프롬프트 ID가 전달된 경우, 해당 프롬프트를 바로 표시
+                        await ShowPromptById(value);
+                        return; // 더 이상 진행하지 않고 프롬프트 모달만 표시
+                    }
                 }
             }
         }
 
+        await LoadInitialData();
         await LoadData();
+    }
+
+    private async Task LoadInitialData()
+    {
+        try
+        {
+            // 카테고리 목록을 먼저 빠르게 로드 (매니페스트만 사용)
+            categories = await PromptService.GetCategoriesFromManifestAsync();
+            StateHasChanged(); // UI 업데이트로 카테고리 필터를 빠르게 표시
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading initial data: {ex.Message}");
+        }
     }
 
     private async Task LoadData()
@@ -150,6 +170,8 @@
         try
         {
             allPrompts = await PromptService.GetAllPromptsAsync();
+            
+            // 전체 카테고리 목록을 다시 가져와서 업데이트 (실제 프롬프트에서 추출한 카테고리 포함)
             categories = await PromptService.GetCategoriesAsync();
 
             // 로컬 스토리지에서 즐겨찾기 상태 복원
@@ -255,23 +277,29 @@
         {
             StateHasChanged();
         }
-    }
-
-    private async Task LoadFavoritesFromStorage()
+    }    private async Task LoadFavoritesFromStorage()
     {
         try
         {
-            if (allPrompts == null) return;
-
             var favoritesJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "favorites");
             if (!string.IsNullOrEmpty(favoritesJson))
             {
                 var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
                 if (favoriteIds != null)
                 {
-                    foreach (var prompt in allPrompts)
+                    // 전체 프롬프트 목록이 있는 경우
+                    if (allPrompts != null)
                     {
-                        prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
+                        foreach (var prompt in allPrompts)
+                        {
+                            prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
+                        }
+                    }
+                    
+                    // 선택된 프롬프트가 있는 경우
+                    if (selectedPrompt != null)
+                    {
+                        selectedPrompt.IsFavorite = favoriteIds.Contains(selectedPrompt.Id);
                     }
                 }
             }
@@ -280,21 +308,66 @@
         {
             Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
         }
-    }
-
-    private async Task SaveFavoritesToStorage()
+    }    private async Task SaveFavoritesToStorage()
     {
         try
         {
-            if (allPrompts == null) return;
+            var favoriteIds = new List<string>();
+            
+            // 전체 프롬프트 목록에서 즐겨찾기 추출
+            if (allPrompts != null)
+            {
+                favoriteIds.AddRange(allPrompts.Where(p => p.IsFavorite).Select(p => p.Id));
+            }
+            
+            // 선택된 프롬프트가 즐겨찾기인 경우 추가 (중복 방지)
+            if (selectedPrompt?.IsFavorite == true && !favoriteIds.Contains(selectedPrompt.Id))
+            {
+                favoriteIds.Add(selectedPrompt.Id);
+            }
+            
+            // 선택된 프롬프트가 즐겨찾기에서 제거된 경우 제거
+            if (selectedPrompt?.IsFavorite == false)
+            {
+                favoriteIds.Remove(selectedPrompt.Id);
+            }
 
-            var favoriteIds = allPrompts.Where(p => p.IsFavorite).Select(p => p.Id).ToList();
-            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds);
+            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds.Distinct().ToList());
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "favorites", favoritesJson);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
+        }
+    }
+
+    private async Task ShowPromptById(string promptId)
+    {
+        try
+        {
+            // 카테고리 정보를 먼저 로드
+            await LoadInitialData();
+            
+            // 특정 프롬프트만 로드
+            selectedPrompt = await PromptService.GetPromptByIdAsync(promptId);
+            
+            if (selectedPrompt != null)
+            {
+                // 즐겨찾기 상태 복원
+                await LoadFavoritesFromStorage();
+                StateHasChanged();
+            }
+            else
+            {
+                // 프롬프트를 찾지 못한 경우 전체 목록으로 이동
+                await LoadData();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading specific prompt: {ex.Message}");
+            // 오류 발생 시 전체 목록으로 이동
+            await LoadData();
         }
     }
 }
