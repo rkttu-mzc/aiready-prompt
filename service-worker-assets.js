@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "lNHBBBVS",
+  "version": "zLdOLcwS",
   "assets": [
     {
       "hash": "sha256-oTpMcq6/gLYfpcpvvkjbcsRcdIZGZzyngaTCa7SJ4Ks=",
@@ -62,8 +62,8 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.JSInterop.trga4cqfu3.wasm"
     },
     {
-      "hash": "sha256-ChGgmLymlsBhEReoy9ZHgdwn3w2YZTC1sGeuRrh6zs4=",
-      "url": "_framework/MzcAirPrompt.aspao6ostf.wasm"
+      "hash": "sha256-xn/6f814HZc+2f8pDjsTg69hhp5fmQr59UXVZUdMDgQ=",
+      "url": "_framework/MzcAirPrompt.ix5r1a2g5f.wasm"
     },
     {
       "hash": "sha256-TaKeC1Qqi09xE7TLpmLQoapnszut4j/pSTLWuGPwbjc=",
@@ -110,8 +110,8 @@ self.assetsManifest = {
       "url": "_framework/System.Net.Primitives.qk8k4u090q.wasm"
     },
     {
-      "hash": "sha256-a3ZSfejVxwqv+GUCVnAkXA7oLnGKiv/pl7mTwmNlx6w=",
-      "url": "_framework/System.Private.CoreLib.x5kmqsz0e3.wasm"
+      "hash": "sha256-yQ/zzAW5CISW4drOb90leMY04jNEvnGifGPNnFHSKTc=",
+      "url": "_framework/System.Private.CoreLib.j100w0p5t3.wasm"
     },
     {
       "hash": "sha256-QnYK3AKR1d8acBWOyDy1qy93DO3k65VPpsHAHGacYIA=",
@@ -126,8 +126,8 @@ self.assetsManifest = {
       "url": "_framework/System.Runtime.InteropServices.pt770ios6x.wasm"
     },
     {
-      "hash": "sha256-SR/wy5dmJw/Dsk2sOiQFGnBX7zHXRXA3iec9S8Yg7r8=",
-      "url": "_framework/System.Runtime.zxnif6pbx3.wasm"
+      "hash": "sha256-hDlrpSL8Zcmouf8SPNaHhSCgVkCl6RjRIurt8JBR8Ro=",
+      "url": "_framework/System.Runtime.k2m77h5rr0.wasm"
     },
     {
       "hash": "sha256-HRKS6NZ08uA9tvp6VNdnuMCDT/x623vH7mBCAoJbESU=",
@@ -146,7 +146,7 @@ self.assetsManifest = {
       "url": "_framework/System.Threading.ik9qxdinuq.wasm"
     },
     {
-      "hash": "sha256-es7cpb/zTHxW4QZZJy59oS2oYtzkrMzK9NNlJog1FOM=",
+      "hash": "sha256-bqDdpxLAeHvA85xpImDb5k+vPrOEi6OQKVBvbvVmrVI=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -182,7 +182,7 @@ self.assetsManifest = {
       "url": "_framework/icudt_no_CJK.lfu7j35m59.dat"
     },
     {
-      "hash": "sha256-qecIB7taZXoNt9Jw+6iYtyvjY8KKZMZx5575QPiLr0U=",
+      "hash": "sha256-jv1p9jLngFa4UwWJE78AU5mmuxOaM5CwnnuWlPoO3u0=",
       "url": "css/app.css"
     },
     {

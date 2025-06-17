@@ -537,6 +537,34 @@ body {
     height: fit-content;
 }
 
+/* 카드 애니메이션 클래스 */
+.prompt-card-enter {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    animation: cardEnter 0.4s ease forwards;
+}
+
+@keyframes cardEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 배치별 지연 효과 */
+.prompt-card-batch-1 { animation-delay: 0s; }
+.prompt-card-batch-2 { animation-delay: 0.1s; }
+.prompt-card-batch-3 { animation-delay: 0.2s; }
+.prompt-card-batch-4 { animation-delay: 0.3s; }
+.prompt-card-batch-5 { animation-delay: 0.4s; }
+
+/* 로딩 상태 개선 */
+.loading p.loading-progress {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0.5rem;
+}
+
 .prompt-card:hover {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.15);
