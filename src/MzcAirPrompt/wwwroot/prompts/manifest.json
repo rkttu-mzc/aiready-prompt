@@ -301,10 +301,6 @@
     },
     {
         "relPath": "education",
-        "fileName": "english-cv-writing.md"
-    },
-    {
-        "relPath": "education",
         "fileName": "icebreaker-activities.md"
     },
     {
@@ -346,10 +342,6 @@
     {
         "relPath": "education",
         "fileName": "problem-generation.md"
-    },
-    {
-        "relPath": "education",
-        "fileName": "resume-writing.md"
     },
     {
         "relPath": "education",
