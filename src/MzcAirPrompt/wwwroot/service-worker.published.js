@@ -6,9 +6,13 @@ self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 
+// PWA 관련 이벤트 리스너 추가
+self.addEventListener('sync', event => event.waitUntil(onBackgroundSync(event)));
+self.addEventListener('push', event => event.waitUntil(onPushMessage(event)));
+
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
-const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/ ];
+const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.md$/ ];
 const offlineAssetsExclude = [ /^service-worker\.js$/ ];
 
 // Replace with your base path if you are hosting on a subfolder. Ensure there is a trailing '/'.
@@ -18,6 +22,9 @@ const manifestUrlList = self.assetsManifest.assets.map(asset => new URL(asset.ur
 
 async function onInstall(event) {
     console.info('Service worker: Install');
+    
+    // 즉시 활성화
+    self.skipWaiting();
 
     // Fetch and cache all matching items from the assets manifest
     const assetsRequests = self.assetsManifest.assets
@@ -29,6 +36,9 @@ async function onInstall(event) {
 
 async function onActivate(event) {
     console.info('Service worker: Activate');
+    
+    // 모든 클라이언트 제어
+    self.clients.claim();
 
     // Delete unused caches
     const cacheKeys = await caches.keys();
@@ -51,5 +61,33 @@ async function onFetch(event) {
         cachedResponse = await cache.match(request);
     }
 
-    return cachedResponse || fetch(event.request);
+    // 네트워크 우선 전략으로 변경하여 최신 데이터 보장
+    try {
+        const fetchResponse = await fetch(event.request);
+        // 성공적으로 가져온 경우 캐시 업데이트
+        if (fetchResponse && fetchResponse.status === 200 && event.request.method === 'GET') {
+            const cache = await caches.open(cacheName);
+            cache.put(event.request, fetchResponse.clone());
+        }
+        return fetchResponse;
+    } catch (error) {
+        // 네트워크 실패 시 캐시에서 반환
+        console.log('네트워크 요청 실패, 캐시에서 응답:', event.request.url);
+        return cachedResponse || new Response('오프라인 상태입니다.', { 
+            status: 503, 
+            statusText: 'Service Unavailable' 
+        });
+    }
+}
+
+// 백그라운드 동기화 처리
+async function onBackgroundSync(event) {
+    console.log('백그라운드 동기화:', event.tag);
+    // 향후 오프라인 데이터 동기화 기능을 여기에 구현할 수 있습니다.
+}
+
+// 푸시 메시지 처리
+async function onPushMessage(event) {
+    console.log('푸시 메시지 수신:', event);
+    // 향후 푸시 알림 기능을 여기에 구현할 수 있습니다.
 }

@@ -1,0 +1,177 @@
+@namespace MzcAirPrompt.Components
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<div class="pwa-install-prompt @(showInstallPrompt ? "show" : "")" id="pwa-install-prompt">
+    <div class="install-card">
+        <div class="install-header">
+            <img src="icon-192.png" alt="앱 아이콘" class="install-icon" />
+            <div class="install-info">
+                <h3>AIR Prompt 설치</h3>
+                <p>홈 화면에 추가하여 빠르게 접근하세요</p>
+            </div>
+            <button class="close-btn" @onclick="HideInstallPrompt">×</button>
+        </div>
+        <div class="install-actions">
+            <button class="btn-install" @onclick="InstallApp">설치</button>
+            <button class="btn-cancel" @onclick="HideInstallPrompt">나중에</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool showInstallPrompt = false;
+    private IJSObjectReference? jsModule;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/pwa-install.js");
+            await CheckInstallPrompt();
+        }
+    }
+
+    private async Task CheckInstallPrompt()
+    {
+        if (jsModule != null)
+        {
+            showInstallPrompt = await jsModule.InvokeAsync<bool>("canInstall");
+            StateHasChanged();
+        }
+    }
+
+    private async Task InstallApp()
+    {
+        if (jsModule != null)
+        {
+            await jsModule.InvokeVoidAsync("installApp");
+            showInstallPrompt = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HideInstallPrompt()
+    {
+        showInstallPrompt = false;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (jsModule != null)
+        {
+            await jsModule.DisposeAsync();
+        }
+    }
+}
+
+<style>
+    .pwa-install-prompt {
+        position: fixed;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        transition: bottom 0.3s ease-in-out;
+        max-width: 400px;
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .pwa-install-prompt.show {
+        bottom: 20px;
+    }
+
+    .install-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+
+    .install-header {
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        gap: 12px;
+        position: relative;
+    }
+
+    .install-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+    }
+
+    .install-info h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .install-info p {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .close-btn:hover {
+        background-color: #f5f5f5;
+    }
+
+    .install-actions {
+        display: flex;
+        gap: 8px;
+        padding: 0 16px 16px 16px;
+    }
+
+    .btn-install, .btn-cancel {
+        flex: 1;
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-install {
+        background: #03173d;
+        color: white;
+    }
+
+    .btn-install:hover {
+        background: #041e4a;
+    }
+
+    .btn-cancel {
+        background: #f5f5f5;
+        color: #666;
+    }
+
+    .btn-cancel:hover {
+        background: #e8e8e8;
+    }
+</style>
