@@ -2,13 +2,48 @@
 <html lang="ko">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MEGAZONE AIR Prompt</title>
-    <script>
+      <!-- Open Graph meta tags for social sharing -->
+    <meta property="og:title" content="MEGAZONE AIR Prompt - AI 프롬프트 라이브러리">
+    <meta property="og:description" content="업무 효율성을 높이는 AI 프롬프트 모음집">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:site_name" content="MEGAZONE AIR Prompt">
+    <meta property="og:image" content="/icon-512.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MEGAZONE AIR Prompt">
+    <meta name="twitter:description" content="업무 효율성을 높이는 AI 프롬프트 모음집">
+    <meta name="twitter:image" content="/icon-512.png">
+      <script>
         // 커스텀 도메인에서 SPA 라우팅 해결을 위한 스크립트
         // 404 페이지에서 index.html로 리다이렉트하면서 경로 정보를 유지
         var pathSegmentsToKeep = 0; // 커스텀 도메인 사용 시 0
         
         var l = window.location;
+        
+        // 프롬프트 상세 페이지인지 확인
+        var isPromptDetail = l.pathname.includes('/prompt/');
+        
+        if (isPromptDetail) {
+            // 프롬프트 ID 추출
+            var pathParts = l.pathname.split('/');
+            var promptIndex = pathParts.findIndex(function(part) { return part === 'prompt'; });
+            var promptId = promptIndex >= 0 && promptIndex + 1 < pathParts.length ? pathParts[promptIndex + 1] : null;
+            
+            // 동적 메타 태그 설정을 위한 스크립트 추가
+            if (promptId) {
+                // 기본 메타 태그 업데이트
+                var ogTitle = document.querySelector('meta[property="og:title"]');
+                var ogUrl = document.querySelector('meta[property="og:url"]');
+                var twitterTitle = document.querySelector('meta[name="twitter:title"]');
+                
+                if (ogTitle) ogTitle.setAttribute('content', '프롬프트 상세 - MEGAZONE AIR Prompt');
+                if (ogUrl) ogUrl.setAttribute('content', l.href);
+                if (twitterTitle) twitterTitle.setAttribute('content', '프롬프트 상세 - MEGAZONE AIR Prompt');
+            }
+        }
+        
         l.replace(
             l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
             l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
