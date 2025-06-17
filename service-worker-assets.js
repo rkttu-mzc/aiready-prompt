@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "zLdOLcwS",
+  "version": "pS/gh1Rm",
   "assets": [
     {
       "hash": "sha256-oTpMcq6/gLYfpcpvvkjbcsRcdIZGZzyngaTCa7SJ4Ks=",
@@ -62,8 +62,8 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.JSInterop.trga4cqfu3.wasm"
     },
     {
-      "hash": "sha256-xn/6f814HZc+2f8pDjsTg69hhp5fmQr59UXVZUdMDgQ=",
-      "url": "_framework/MzcAirPrompt.ix5r1a2g5f.wasm"
+      "hash": "sha256-RkvH9St8wdgolL5pbp/FwZ4HM/5k03kqPF+aMvYX2jE=",
+      "url": "_framework/MzcAirPrompt.2p4m2uho3j.wasm"
     },
     {
       "hash": "sha256-TaKeC1Qqi09xE7TLpmLQoapnszut4j/pSTLWuGPwbjc=",
@@ -146,7 +146,7 @@ self.assetsManifest = {
       "url": "_framework/System.Threading.ik9qxdinuq.wasm"
     },
     {
-      "hash": "sha256-bqDdpxLAeHvA85xpImDb5k+vPrOEi6OQKVBvbvVmrVI=",
+      "hash": "sha256-e4COET7XZf3MaIZifHW4/5kzMc2bpPVWKok8MMDaguE=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -510,10 +510,6 @@ self.assetsManifest = {
       "url": "prompts/education/difficult-sentence-summary.md"
     },
     {
-      "hash": "sha256-u0+ElyJ1teU1pYj/hlN+a2GUrEFjBiwaawK2H/sbNGM=",
-      "url": "prompts/education/english-cv-writing.md"
-    },
-    {
       "hash": "sha256-AvoOmcQ0f+cHequKC8Q06LSr2uAIF2Tq5y9V7qbz8iA=",
       "url": "prompts/education/icebreaker-activities.md"
     },
@@ -558,10 +554,6 @@ self.assetsManifest = {
       "url": "prompts/education/problem-generation.md"
     },
     {
-      "hash": "sha256-GX1yeFPOuz1oGaqJ7Ni+LoVxI8TIF3+ykSMQnGl6oSU=",
-      "url": "prompts/education/resume-writing.md"
-    },
-    {
       "hash": "sha256-aFiZ6JJh1uctjdSn7u4XT/0C9BfKObflMd+vtshY86E=",
       "url": "prompts/education/training-planning.md"
     },
@@ -574,7 +566,7 @@ self.assetsManifest = {
       "url": "prompts/education/workshop-facilitation.md"
     },
     {
-      "hash": "sha256-2EgIEOfiSH0DIVSqLa3O61JgnYL6LTmBSmjIrC85Mok=",
+      "hash": "sha256-1JyU3Hvo8bZKwYgpPKx1YQ7liAbIFDqZtG4ZXozPPXA=",
       "url": "prompts/manifest.json"
     },
     {
