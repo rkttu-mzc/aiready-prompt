@@ -48,7 +48,8 @@
                 <div class="spinner"></div>
                 <p>프롬프트를 불러오는 중...</p>
             </div>
-        }        else if (displayedPrompts?.Any() == true)
+        }
+        else if (displayedPrompts?.Any() == true)
         {
             <div class="prompts-stats">
                 <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>
@@ -57,7 +58,8 @@
                     <span class="loading-more">더 불러오는 중...</span>
                 }
             </div>
-              <div class="prompts-grid">                @foreach (var prompt in displayedPrompts)
+            <div class="prompts-grid">
+                @foreach (var prompt in displayedPrompts)
                 {
                     <PromptCard Prompt="prompt" OnCardClick="ViewPrompt" OnToggleFavorite="ToggleFavorite" />
                 }
@@ -84,12 +86,13 @@
     private List<PromptItem>? allPrompts;
     private List<PromptItem> displayedPrompts = new();
     private List<string>? categories;
-    private string searchTerm = "";
-    private string _selectedCategory = "";
+    private string searchTerm = string.Empty;
+    private string _selectedCategory = string.Empty;
     private bool showFavoritesOnly = false;
     private bool isLoading = true;
     private bool isLoadingMore = false;
     private PromptItem? selectedPrompt;
+
     private CancellationTokenSource? _loadingCancellationTokenSource;private string selectedCategory
     {
         get => _selectedCategory;
@@ -114,7 +117,9 @@
                 ApplyFilters();
             }
         }
-    }    protected override async Task OnInitializedAsync()
+    }
+    
+    protected override async Task OnInitializedAsync()
     {
         // URL 파라미터 처리
         var uri = new Uri(Navigation.Uri);
@@ -184,7 +189,9 @@
         {
             Console.WriteLine($"Error loading initial data: {ex.Message}");
         }
-    }    private async Task LoadData()
+    }
+    
+    private async Task LoadData()
     {
         isLoading = true;
         StateHasChanged();
@@ -236,7 +243,9 @@
             isLoading = false;
             StateHasChanged();
         }
-    }    private void OnSearchInput(ChangeEventArgs e)
+    }
+    
+    private void OnSearchInput(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? "";
         
@@ -256,7 +265,9 @@
         {
             ApplyFilters();
         }
-    }private void ApplyFilters()
+    }
+    
+    private void ApplyFilters()
     {
         if (allPrompts == null) return;
 
@@ -382,7 +393,9 @@
         {
             StateHasChanged();
         }
-    }    private async Task LoadFavoritesFromStorage()
+    }
+    
+    private async Task LoadFavoritesFromStorage()
     {
         try
         {
@@ -413,7 +426,9 @@
         {
             Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
         }
-    }    private async Task SaveFavoritesToStorage()
+    }
+    
+    private async Task SaveFavoritesToStorage()
     {
         try
         {
@@ -444,7 +459,9 @@
         {
             Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
         }
-    }    public void Dispose()
+    }
+    
+    public void Dispose()
     {
         _loadingCancellationTokenSource?.Cancel();
         _loadingCancellationTokenSource?.Dispose();

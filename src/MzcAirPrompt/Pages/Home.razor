@@ -94,7 +94,8 @@
     @if (recentPrompts?.Any() == true)
     {        <section class="recent-section">
             <h2 class="section-title">최근 업데이트된 프롬프트</h2>
-            <div class="recent-prompts-grid">                @foreach (var prompt in recentPrompts.Take(3))
+            <div class="recent-prompts-grid">
+                @foreach (var prompt in recentPrompts.Take(3))
                 {
                     <PromptMiniCard Prompt="prompt" 
                                     OnCardClick="ViewPrompt" 
@@ -130,7 +131,9 @@
         {
             Console.WriteLine($"Error loading quick stats: {ex.Message}");
         }
-    }    private async Task LoadData()
+    }
+    
+    private async Task LoadData()
     {
         try
         {
@@ -182,11 +185,15 @@
     private void ViewAllPrompts()
     {
         Navigation.NavigateTo("/prompts");
-    }    private void ViewPrompt(string promptId)
+    }
+    
+    private void ViewPrompt(string promptId)
     {
         // Prompts 페이지로 이동하면서 특정 프롬프트를 바로 열도록 함
         Navigation.NavigateTo($"/prompts?promptId={Uri.EscapeDataString(promptId)}");
-    }    private async Task ToggleFavorite(PromptItem prompt)
+    }
+    
+    private async Task ToggleFavorite(PromptItem prompt)
     {
         try
         {
@@ -203,7 +210,9 @@
             // 오류 발생 시 상태 되돌리기
             prompt.IsFavorite = !prompt.IsFavorite;
         }
-    }    private async Task LoadFavoriteState(PromptItem prompt)
+    }
+    
+    private async Task LoadFavoriteState(PromptItem prompt)
     {
         try
         {
@@ -274,7 +283,9 @@
             "design" or "디자인" => "🎨",
             _ => "📝"
         };
-    }    private int GetCategoryCount(string category)
+    }
+    
+    private int GetCategoryCount(string category)
     {
         // 매니페스트 데이터에서 카테고리별 개수를 가져오도록 수정
         return PromptService.GetCategoryCountAsync(category).Result;
