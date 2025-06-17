@@ -501,6 +501,22 @@ body {
     font-size: 1.1rem;
 }
 
+.loading-more {
+    display: inline-block;
+    margin-left: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
 /* 프롬프트 그리드 */
 .prompts-grid {
     display: grid;
@@ -554,6 +570,34 @@ body {
 }
 
 .favorite-btn-mini:active {
+    transform: scale(0.95);
+}
+
+/* PromptCard용 즐겨찾기 버튼 */
+.prompt-card .favorite-btn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    min-width: auto;
+    box-shadow: none;
+}
+
+.prompt-card .favorite-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+.prompt-card .favorite-btn:active {
     transform: scale(0.95);
 }
 

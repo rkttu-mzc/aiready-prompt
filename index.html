@@ -1,17 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>MEGAZONE AIR Prompt</title>
     <base href="/" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="AI 프롬프트 라이브러리 - 업무 효율성을 높이는 AI 프롬프트 모음" />
+    <meta name="keywords" content="AI, 프롬프트, ChatGPT, 생산성, 업무효율" />
+    <meta name="author" content="MEGAZONE AIR" />
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#03173d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="AIR Prompt" />
+    
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="css/app.css" />
     <!-- If you add any scoped CSS files, uncomment the following to load them
     <link href="MzcAirPrompt.styles.css" rel="stylesheet" /> -->
-    <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
 </head>
 
 <body>
@@ -27,9 +45,33 @@
         An unhandled error has occurred.
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
-    </div>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    </div>    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        // 서비스 워커 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker 등록 성공:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker 등록 실패:', error);
+                });
+        }
+        
+        // PWA 설치 관련 이벤트 처리
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA 설치 프롬프트 준비됨');
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+        
+        window.addEventListener('appinstalled', (e) => {
+            console.log('PWA 설치 완료');
+            deferredPrompt = null;
+        });
+    </script>
 </body>
 
 </html>

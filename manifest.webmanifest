@@ -1,22 +1,35 @@
 {
-  "name": "MzcAirPrompt",
-  "short_name": "MzcAirPrompt",
+  "name": "MEGAZONE AIR Prompt",
+  "short_name": "AIR Prompt",
+  "description": "AI 프롬프트 라이브러리 - 업무 효율성을 높이는 AI 프롬프트 모음",
   "id": "./",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#03173d",
+  "orientation": "portrait-primary",
   "prefer_related_applications": false,
+  "categories": ["productivity", "utilities", "business"],
   "icons": [
     {
       "src": "icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "form_factor": "wide"
     }
   ]
 }
