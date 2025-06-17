@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>MEGAZONE AIR Prompt</title>
+    <script>
+        // 커스텀 도메인에서 SPA 라우팅 해결을 위한 스크립트
+        // 404 페이지에서 index.html로 리다이렉트하면서 경로 정보를 유지
+        var pathSegmentsToKeep = 0; // 커스텀 도메인 사용 시 0
+        
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
+</head>
+<body>
+    <!-- 이 페이지는 즉시 index.html로 리다이렉트됩니다 -->
+    <p>페이지를 불러오는 중...</p>
+</body>
+</html>

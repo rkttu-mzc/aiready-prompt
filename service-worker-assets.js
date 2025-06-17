@@ -1,6 +1,14 @@
 self.assetsManifest = {
-  "version": "pS/gh1Rm",
+  "version": "k3twNsQR",
   "assets": [
+    {
+      "hash": "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+      "url": ".nojekyll"
+    },
+    {
+      "hash": "sha256-L2z6IPZXVZfMWTjaZFFKBLQDoORBlQmjFrrqyNrVL9Y=",
+      "url": "404.html"
+    },
     {
       "hash": "sha256-oTpMcq6/gLYfpcpvvkjbcsRcdIZGZzyngaTCa7SJ4Ks=",
       "url": "_framework/Markdig.57ujnljo5y.wasm"
@@ -62,8 +70,8 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.JSInterop.trga4cqfu3.wasm"
     },
     {
-      "hash": "sha256-RkvH9St8wdgolL5pbp/FwZ4HM/5k03kqPF+aMvYX2jE=",
-      "url": "_framework/MzcAirPrompt.2p4m2uho3j.wasm"
+      "hash": "sha256-rZ2ioTzQx+990sWz+SH31b9elt1z39XBy//JhO12ykI=",
+      "url": "_framework/MzcAirPrompt.hvgtbmm5rf.wasm"
     },
     {
       "hash": "sha256-TaKeC1Qqi09xE7TLpmLQoapnszut4j/pSTLWuGPwbjc=",
@@ -146,7 +154,7 @@ self.assetsManifest = {
       "url": "_framework/System.Threading.ik9qxdinuq.wasm"
     },
     {
-      "hash": "sha256-e4COET7XZf3MaIZifHW4/5kzMc2bpPVWKok8MMDaguE=",
+      "hash": "sha256-OehcrpqasI4hJzsHQCXfS7Zh5HpzqrBgn4p+nAzVfrU=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -194,7 +202,7 @@ self.assetsManifest = {
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-r67H7al0KpQkGC8pmd3BlgTJUfMlZ9ENWikPTMFuJWY=",
+      "hash": "sha256-abjAPP0cIOrDnKuWUivWI9QX2SB/K0bHSQltD3vvbU4=",
       "url": "index.html"
     },
     {
@@ -242,6 +250,10 @@ self.assetsManifest = {
       "url": "prompts/business/business-strategy.md"
     },
     {
+      "hash": "sha256-bXs6z0UQ5ycNYl2wcGH8E2INfw89WqZC76f9+UZdpbw=",
+      "url": "prompts/business/candidate-evaluation.md"
+    },
+    {
       "hash": "sha256-qvUZ7d0qusuS3uGqrTY584GAm2e6SLMyNZI/Kqc4WVg=",
       "url": "prompts/business/company-regulations.md"
     },
@@ -280,6 +292,10 @@ self.assetsManifest = {
     {
       "hash": "sha256-AjAKk9Ojo1NEAU6r3NkLsKh8mWMewPfIUmROMXaaQLk=",
       "url": "prompts/business/idea-creation.md"
+    },
+    {
+      "hash": "sha256-UaRr4pXryAKxrDnXASfyn1Agqko6StfgUiAaCQeLAjI=",
+      "url": "prompts/business/interview-questions.md"
     },
     {
       "hash": "sha256-/a3t/TNwa1uNSdUtBFqsHp6a7gt5OoqeQFvDEIPiG5U=",
@@ -348,6 +364,10 @@ self.assetsManifest = {
     {
       "hash": "sha256-NrNX1hSyFIUXgp1j/oCSi/te8dTzkr8CpYuURbYHfCg=",
       "url": "prompts/business/report-writing.md"
+    },
+    {
+      "hash": "sha256-gPELyC664mDBg68in2h8KUDD+Mi18IQpJgcRISr935g=",
+      "url": "prompts/business/resume-review.md"
     },
     {
       "hash": "sha256-b/obgwW48MdkMCqRJjUCE2sssaFIYXAHZ+G2CEnh9fE=",
@@ -566,7 +586,7 @@ self.assetsManifest = {
       "url": "prompts/education/workshop-facilitation.md"
     },
     {
-      "hash": "sha256-1JyU3Hvo8bZKwYgpPKx1YQ7liAbIFDqZtG4ZXozPPXA=",
+      "hash": "sha256-yfWL9VT7SVwSkl4yZOy/qr1G1d/zfqP7zmUYJLmv6IY=",
       "url": "prompts/manifest.json"
     },
     {
