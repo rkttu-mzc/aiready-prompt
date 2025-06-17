@@ -12,6 +12,19 @@ self.addEventListener('fetch', (event) => {
 // 서비스 워커 설치 이벤트
 self.addEventListener('install', (event) => {
     console.log('Service Worker: 설치됨');
+    
+    // 개발 환경에서도 업데이트 알림 테스트를 위해 클라이언트에 메시지 전송
+    event.waitUntil(
+        self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+                client.postMessage({
+                    type: 'UPDATE_AVAILABLE',
+                    version: 'dev-' + Date.now()
+                });
+            });
+        })
+    );
+    
     self.skipWaiting(); // 즉시 활성화
 });
 
@@ -19,6 +32,39 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     console.log('Service Worker: 활성화됨');
     event.waitUntil(self.clients.claim()); // 모든 클라이언트 제어
+});
+
+// 클라이언트 메시지 처리
+self.addEventListener('message', event => {
+    console.log('Service worker received message:', event.data);
+    
+    if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+        console.log('Received UPDATE_AVAILABLE message, broadcasting to all clients');
+        
+        // 모든 클라이언트에 업데이트 메시지 전송
+        self.clients.matchAll().then(clients => {
+            console.log('Broadcasting UPDATE_AVAILABLE to', clients.length, 'clients');
+            clients.forEach(client => {
+                client.postMessage({
+                    type: 'UPDATE_AVAILABLE',
+                    version: event.data.version || 'unknown'
+                });
+            });
+        });
+    } else if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('Received SKIP_WAITING message');
+        // 클라이언트가 업데이트를 승인했을 때 즉시 활성화
+        self.skipWaiting();
+        
+        // 모든 클라이언트에 새로고침 요청
+        self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+                client.postMessage({
+                    type: 'RELOAD_REQUEST'
+                });
+            });
+        });
+    }
 });
 
 // 백그라운드 동기화 (향후 사용을 위해 준비)

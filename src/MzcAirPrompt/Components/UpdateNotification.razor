@@ -1,0 +1,189 @@
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+<div class="update-notification @(isVisible ? "show" : "")" style="@GetNotificationStyle()">
+    <div class="update-content">
+        <div class="update-icon">🔄</div>
+        <div class="update-text">
+            <h4>새로운 업데이트가 있습니다!</h4>
+            <p>더 나은 경험을 위해 페이지를 새로고침해주세요.</p>
+        </div>
+        <div class="update-actions">
+            <button class="btn-refresh" @onclick="RefreshPage">새로고침</button>
+            <button class="btn-close" @onclick="CloseNotification">나중에</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isVisible = false;
+    private IJSObjectReference? jsModule;
+    private DotNetObjectReference<UpdateNotification>? objRef;    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                objRef = DotNetObjectReference.Create(this);
+                jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/update-notification.js");
+                await jsModule.InvokeVoidAsync("initialize", objRef);
+                Console.WriteLine("UpdateNotification: JavaScript module initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"UpdateNotification: Error initializing JavaScript module: {ex.Message}");
+            }
+        }
+    }
+
+    [JSInvokable]
+    public async Task ShowUpdateNotification()
+    {
+        Console.WriteLine("UpdateNotification: ShowUpdateNotification called");
+        isVisible = true;
+        await InvokeAsync(StateHasChanged);
+        Console.WriteLine("UpdateNotification: State updated, notification should be visible");
+    }private async Task RefreshPage()
+    {
+        if (jsModule is not null)
+        {
+            await jsModule.InvokeVoidAsync("acceptUpdate");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("location.reload");
+        }
+    }
+
+    private async Task CloseNotification()
+    {
+        isVisible = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetNotificationStyle()
+    {
+        return @"
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: all 0.3s ease-in-out;
+            max-width: 350px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        ";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (jsModule is not null)
+        {
+            await jsModule.DisposeAsync();
+        }
+        objRef?.Dispose();
+    }
+}
+
+<style>
+    .update-notification.show {
+        transform: translateX(0) !important;
+    }
+
+    .update-content {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        gap: 15px;
+    }    .update-icon {
+        font-size: 24px;
+        animation: rotate 2s linear infinite;
+    }
+
+    @@keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .update-text h4 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .update-text p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.9;
+        line-height: 1.4;
+    }
+
+    .update-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-left: auto;
+    }
+
+    .btn-refresh, .btn-close {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 80px;
+    }
+
+    .btn-refresh {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .btn-refresh:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-1px);
+    }
+
+    .btn-close {
+        background: transparent;
+        color: rgba(255,255,255,0.8);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .btn-close:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    @@media (max-width: 480px) {
+        .update-notification {
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+        
+        .update-content {
+            padding: 15px;
+        }
+        
+        .update-actions {
+            flex-direction: row;
+            gap: 5px;
+        }
+        
+        .btn-refresh, .btn-close {
+            min-width: 60px;
+            font-size: 11px;
+            padding: 6px 12px;
+        }
+    }
+</style>

@@ -5,6 +5,7 @@ self.importScripts('./service-worker-assets.js');
 self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
+self.addEventListener('message', event => event.waitUntil(onMessage(event)));
 
 // PWA 관련 이벤트 리스너 추가
 self.addEventListener('sync', event => event.waitUntil(onBackgroundSync(event)));
@@ -23,8 +24,17 @@ const manifestUrlList = self.assetsManifest.assets.map(asset => new URL(asset.ur
 async function onInstall(event) {
     console.info('Service worker: Install');
     
-    // 즉시 활성화
-    self.skipWaiting();
+    // 새로운 버전이 설치될 때 클라이언트에 알림
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'UPDATE_AVAILABLE',
+            version: self.assetsManifest.version
+        });
+    });
+    
+    // 즉시 활성화하지 않고 대기 (사용자가 새로고침할 때까지)
+    // self.skipWaiting();
 
     // Fetch and cache all matching items from the assets manifest
     const assetsRequests = self.assetsManifest.assets
@@ -45,6 +55,15 @@ async function onActivate(event) {
     await Promise.all(cacheKeys
         .filter(key => key.startsWith(cacheNamePrefix) && key !== cacheName)
         .map(key => caches.delete(key)));
+        
+    // 클라이언트에 활성화 알림
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+        client.postMessage({
+            type: 'SW_ACTIVATED',
+            version: self.assetsManifest.version
+        });
+    });
 }
 
 async function onFetch(event) {
@@ -90,4 +109,22 @@ async function onBackgroundSync(event) {
 async function onPushMessage(event) {
     console.log('푸시 메시지 수신:', event);
     // 향후 푸시 알림 기능을 여기에 구현할 수 있습니다.
+}
+
+// 클라이언트 메시지 처리
+async function onMessage(event) {
+    console.log('Service worker received message:', event.data);
+    
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        // 클라이언트가 업데이트를 승인했을 때 즉시 활성화
+        self.skipWaiting();
+        
+        // 모든 클라이언트에 새로고침 요청
+        const clients = await self.clients.matchAll();
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'RELOAD_REQUEST'
+            });
+        });
+    }
 }

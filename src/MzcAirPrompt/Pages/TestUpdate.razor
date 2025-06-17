@@ -1,0 +1,276 @@
+@page "/test-update"
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+    <h1>업데이트 알림 테스트</h1>
+    <p>이 페이지는 새 배포 시 업데이트 알림 기능을 테스트하기 위한 페이지입니다.</p>
+      <div class="test-buttons">
+        <button class="btn btn-primary" @onclick="SimulateUpdate">업데이트 시뮬레이션</button>
+        <button class="btn btn-warning" @onclick="DirectNotificationTest">직접 알림 테스트</button>
+        <button class="btn btn-secondary" @onclick="CheckServiceWorker">Service Worker 상태 확인</button>
+        <button class="btn btn-info" @onclick="UnregisterServiceWorker">Service Worker 제거</button>
+        <button class="btn btn-success" @onclick="RegisterServiceWorker">Service Worker 재등록</button>
+    </div>
+    
+    <div class="info-section">
+        <h3>사용 방법:</h3>
+        <ol>
+            <li><strong>개발 환경 테스트:</strong> "업데이트 시뮬레이션" 버튼을 클릭하여 업데이트 알림을 표시합니다.</li>
+            <li><strong>실제 배포 테스트:</strong> 
+                <ul>
+                    <li>애플리케이션을 빌드하고 배포합니다.</li>
+                    <li>코드를 수정한 후 다시 배포합니다.</li>
+                    <li>브라우저에서 페이지를 새로고침하면 업데이트 알림이 표시됩니다.</li>
+                </ul>
+            </li>
+            <li><strong>Service Worker 상태:</strong> "Service Worker 상태 확인" 버튼으로 현재 상태를 확인할 수 있습니다.</li>
+        </ol>
+        
+        <div class="alert alert-info mt-3">
+            <strong>참고:</strong> 프로덕션 환경에서는 Service Worker가 새 버전을 감지하면 자동으로 업데이트 알림이 표시됩니다.
+        </div>
+    </div>
+</div>
+
+@code {
+    private async Task SimulateUpdate()
+    {
+        try
+        {
+            // 먼저 Service Worker 상태 확인
+            var hasServiceWorker = await JSRuntime.InvokeAsync<bool>("eval", "'serviceWorker' in navigator");
+            
+            if (hasServiceWorker)
+            {
+                // Service Worker를 통해 업데이트 시뮬레이션
+                await JSRuntime.InvokeVoidAsync("eval", @"
+                    (function() {
+                        if (navigator.serviceWorker.controller) {
+                            console.log('Sending UPDATE_AVAILABLE message to service worker');
+                            navigator.serviceWorker.controller.postMessage({
+                                type: 'UPDATE_AVAILABLE',
+                                version: 'test-' + Date.now()
+                            });
+                        } else {
+                            console.log('No service worker controller, triggering custom event');
+                            window.dispatchEvent(new CustomEvent('sw-update-available'));
+                        }
+                    })();
+                ");
+            }
+            else
+            {
+                // Service Worker가 없으면 직접 업데이트 알림 표시
+                await JSRuntime.InvokeVoidAsync("eval", @"
+                    console.log('No service worker support, triggering custom event directly');
+                    window.dispatchEvent(new CustomEvent('sw-update-available'));
+                ");
+            }
+            
+            // 추가적으로 직접 Blazor 컴포넌트에 알림 (백업 방법)
+            await Task.Delay(100); // 약간의 지연
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                // UpdateNotification 컴포넌트가 있는지 확인하고 직접 호출
+                const updateElements = document.querySelectorAll('.update-notification');
+                if (updateElements.length > 0) {
+                    console.log('Found update notification elements, attempting to show');
+                    // 강제로 알림 표시
+                    updateElements.forEach(el => {
+                        el.classList.add('show');
+                        el.style.transform = 'translateX(0)';
+                    });
+                }
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SimulateUpdate error: {ex.Message}");
+            // 에러가 발생하면 알림 표시            await JSRuntime.InvokeVoidAsync("alert", $"업데이트 시뮬레이션 중 오류가 발생했습니다: {ex.Message}");
+        }
+    }
+    
+    private async Task DirectNotificationTest()
+    {
+        try
+        {
+            Console.WriteLine("DirectNotificationTest: Starting direct notification test");
+            
+            // JavaScript를 통해 직접 함수 호출
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                console.log('DirectNotificationTest: Calling showUpdateNotificationTest');
+                if (window.showUpdateNotificationTest) {
+                    window.showUpdateNotificationTest();
+                } else {
+                    console.error('showUpdateNotificationTest function not found');
+                    // 백업 방법: 커스텀 이벤트 발생
+                    window.dispatchEvent(new CustomEvent('sw-update-available'));
+                }
+            ");
+            
+            Console.WriteLine("DirectNotificationTest: JavaScript executed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"DirectNotificationTest error: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"직접 알림 테스트 중 오류가 발생했습니다: {ex.Message}");
+        }
+    }
+    
+    private async Task CheckServiceWorker()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    console.log('Service Worker 등록 수:', registrations.length);
+                    registrations.forEach((registration, index) => {
+                        console.log(`SW ${index + 1}:`, {
+                            scope: registration.scope,
+                            active: !!registration.active,
+                            installing: !!registration.installing,
+                            waiting: !!registration.waiting
+                        });
+                    });
+                    alert(`Service Worker 등록 수: ${registrations.length}\n자세한 내용은 개발자 도구 콘솔을 확인하세요.`);
+                });
+            } else {
+                alert('이 브라우저는 Service Worker를 지원하지 않습니다.');
+            }
+        ");
+    }
+    
+    private async Task UnregisterServiceWorker()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister().then(success => {
+                            if (success) {
+                                console.log('Service Worker 제거 성공');
+                            }
+                        });
+                    });
+                    alert('Service Worker를 제거했습니다. 페이지를 새로고침하세요.');
+                });
+            }
+        ");
+    }
+    
+    private async Task RegisterServiceWorker()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker 등록 성공:', registration);
+                        alert('Service Worker가 등록되었습니다.');
+                    })
+                    .catch(error => {
+                        console.error('Service Worker 등록 실패:', error);
+                        alert('Service Worker 등록에 실패했습니다.');
+                    });
+            }
+        ");
+    }
+}
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .test-buttons {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+      .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #545b62;
+    }
+    
+    .btn-info {
+        background-color: #17a2b8;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background-color: #117a8b;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background-color: #1e7e34;
+    }
+    
+    .info-section {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+    }
+    
+    .mt-3 {
+        margin-top: 1rem;
+    }
+    
+    @@media (max-width: 600px) {
+        .test-buttons {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+</style>

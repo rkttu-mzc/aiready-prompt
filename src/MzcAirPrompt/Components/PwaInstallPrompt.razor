@@ -3,6 +3,9 @@
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
+@* 설치 팝업을 완전히 비활성화하려면 아래 라인의 주석을 해제하세요 *@
+@* @if (false) { *@
+
 <div class="pwa-install-prompt @(showInstallPrompt ? "show" : "")" id="pwa-install-prompt">
     <div class="install-card">
         <div class="install-header">
@@ -19,6 +22,8 @@
         </div>
     </div>
 </div>
+
+@* @} *@
 
 @code {
     private bool showInstallPrompt = false;
@@ -50,10 +55,12 @@
             showInstallPrompt = false;
             StateHasChanged();
         }
-    }
-
-    private void HideInstallPrompt()
+    }    private async Task HideInstallPrompt()
     {
+        if (jsModule != null)
+        {
+            await jsModule.InvokeVoidAsync("dismissInstallPrompt");
+        }
         showInstallPrompt = false;
         StateHasChanged();
     }
