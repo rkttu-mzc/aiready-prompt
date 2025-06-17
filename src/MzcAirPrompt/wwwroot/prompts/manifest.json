@@ -178,10 +178,21 @@
     {
         "relPath": "business",
         "fileName": "x-user-interview.md"
+    },    {
+        "relPath": "business",
+        "fileName": "x-website-content.md"
     },
     {
         "relPath": "business",
-        "fileName": "x-website-content.md"
+        "fileName": "resume-review.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "interview-questions.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "candidate-evaluation.md"
     },
     {
         "relPath": "development",
