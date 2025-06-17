@@ -42,7 +42,7 @@
     </header>
 
     <main class="gallery-content">
-        @if (isLoading)
+        @if (isLoading && !displayedPrompts.Any())
         {
             <div class="loading">
                 <div class="spinner"></div>
@@ -52,16 +52,20 @@
         else if (displayedPrompts?.Any() == true)
         {
             <div class="prompts-stats">
-                <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>
-                @if (isLoadingMore)
+                <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>                @if (isLoading)
                 {
                     <span class="loading-more">더 불러오는 중...</span>
                 }
-            </div>
-            <div class="prompts-grid">
-                @foreach (var prompt in displayedPrompts)
+            </div>            <div class="prompts-grid">
+                @for (int i = 0; i < displayedPrompts.Count; i++)
                 {
-                    <PromptCard Prompt="prompt" OnCardClick="ViewPrompt" OnToggleFavorite="ToggleFavorite" />
+                    var prompt = displayedPrompts[i];
+                    var batchIndex = i; // 배치 인덱스 계산
+                    <PromptCard Prompt="prompt" 
+                               BatchIndex="batchIndex" 
+                               ShowAnimation="true"
+                               OnCardClick="ViewPrompt" 
+                               OnToggleFavorite="ToggleFavorite" />
                 }
             </div>
         }
@@ -88,9 +92,7 @@
     private List<string>? categories;
     private string searchTerm = string.Empty;
     private string _selectedCategory = string.Empty;
-    private bool showFavoritesOnly = false;
-    private bool isLoading = true;
-    private bool isLoadingMore = false;
+    private bool showFavoritesOnly = false;    private bool isLoading = true;
     private PromptItem? selectedPrompt;
 
     private CancellationTokenSource? _loadingCancellationTokenSource;private string selectedCategory
@@ -190,8 +192,7 @@
             Console.WriteLine($"Error loading initial data: {ex.Message}");
         }
     }
-    
-    private async Task LoadData()
+      private async Task LoadData()
     {
         isLoading = true;
         StateHasChanged();
@@ -205,6 +206,10 @@
             displayedPrompts.Clear();
             allPrompts = new List<PromptItem>();
 
+            var batchSize = 5; // 한 번에 5개씩 배치로 처리
+            var currentBatch = new List<PromptItem>();
+            var lastUpdateTime = DateTime.Now;
+
             // IAsyncEnumerable을 사용하여 동적으로 프롬프트 로드
             await foreach (var prompt in PromptService.GetPromptsAsyncEnumerable().WithCancellation(_loadingCancellationTokenSource.Token))
             {
@@ -213,12 +218,31 @@
                 // 로컬 스토리지에서 즐겨찾기 상태 복원
                 await RestoreFavoriteState(prompt);
 
-                // 필터 조건에 맞는지 확인하고 표시 목록에 추가
+                // 필터 조건에 맞는지 확인하고 배치에 추가
                 if (ShouldDisplayPrompt(prompt))
                 {
-                    displayedPrompts.Add(prompt);
-                    StateHasChanged(); // UI 업데이트하여 프롬프트가 하나씩 나타나도록
+                    currentBatch.Add(prompt);
                 }
+
+                // 배치가 가득 찼거나 마지막 업데이트 후 200ms가 지났으면 UI 업데이트
+                var now = DateTime.Now;
+                if (currentBatch.Count >= batchSize || (now - lastUpdateTime).TotalMilliseconds > 200)
+                {
+                    displayedPrompts.AddRange(currentBatch);
+                    currentBatch.Clear();
+                    lastUpdateTime = now;
+                    StateHasChanged(); // 배치 단위로 UI 업데이트
+                    
+                    // 부드러운 애니메이션을 위해 잠시 대기
+                    await Task.Delay(50, _loadingCancellationTokenSource.Token);
+                }
+            }
+
+            // 남은 배치 처리
+            if (currentBatch.Any())
+            {
+                displayedPrompts.AddRange(currentBatch);
+                StateHasChanged();
             }
             
             // 전체 카테고리 목록을 다시 가져와서 업데이트 (실제 프롬프트에서 추출한 카테고리 포함)

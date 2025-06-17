@@ -1,6 +1,6 @@
 @using MzcAirPrompt.Models
 
-<div class="prompt-card @(Prompt.IsFavorite ? "favorite" : "")" @onclick="() => OnCardClick?.Invoke(Prompt.Id)">    <div class="prompt-header">
+<div class="prompt-card @GetAnimationClass() @(Prompt.IsFavorite ? "favorite" : "")" @onclick="() => OnCardClick?.Invoke(Prompt.Id)">    <div class="prompt-header">
         <div class="title-section">
             <h3 class="prompt-title">@Prompt.Title</h3>
         </div>
@@ -37,6 +37,16 @@
 @code {
     [Parameter] public PromptItem Prompt { get; set; } = null!;
     [Parameter] public int MaxTags { get; set; } = 3;
+    [Parameter] public int BatchIndex { get; set; } = 0;
+    [Parameter] public bool ShowAnimation { get; set; } = true;
     [Parameter] public Action<string>? OnCardClick { get; set; }
     [Parameter] public Func<PromptItem, Task>? OnToggleFavorite { get; set; }
+
+    private string GetAnimationClass()
+    {
+        if (!ShowAnimation) return "";
+        
+        var batchClass = BatchIndex % 5 + 1; // 1-5 사이의 값
+        return $"prompt-card-enter prompt-card-batch-{batchClass}";
+    }
 }
