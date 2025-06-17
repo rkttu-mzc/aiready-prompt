@@ -1,6 +1,7 @@
 @using MzcAirPrompt.Models
+@inject NavigationManager Navigation
 
-<div class="prompt-card @GetAnimationClass() @(Prompt.IsFavorite ? "favorite" : "")" @onclick="() => OnCardClick?.Invoke(Prompt.Id)">    <div class="prompt-header">
+<div class="prompt-card @GetAnimationClass() @(Prompt.IsFavorite ? "favorite" : "")" @onclick="NavigateToDetail">    <div class="prompt-header">
         <div class="title-section">
             <h3 class="prompt-title">@Prompt.Title</h3>
         </div>
@@ -41,6 +42,12 @@
     [Parameter] public bool ShowAnimation { get; set; } = true;
     [Parameter] public Action<string>? OnCardClick { get; set; }
     [Parameter] public Func<PromptItem, Task>? OnToggleFavorite { get; set; }
+
+    private void NavigateToDetail()
+    {
+        Navigation.NavigateTo($"/prompt/{Prompt.Id}");
+        OnCardClick?.Invoke(Prompt.Id);
+    }
 
     private string GetAnimationClass()
     {

@@ -1,0 +1,800 @@
+@page "/prompt/{promptId}"
+@inject PromptService PromptService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+@implements IDisposable
+@using Microsoft.AspNetCore.Components.Web
+
+@if (currentPrompt != null)
+{
+    <div class="prompt-detail-container">
+        <!-- 백그라운드 데코레이션 -->
+        <div class="background-decoration"></div>
+        
+        <!-- 메인 컨테이너 -->
+        <div class="main-container">
+            <!-- 네비게이션 헤더 -->
+            <nav class="detail-navigation">
+                <button class="nav-back-btn" @onclick="GoBack">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    목록으로 돌아가기
+                </button>
+                
+                <div class="nav-actions">
+                    <button class="nav-action-btn" @onclick="CopyPermalink" title="링크 복사">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                    </button>
+                    <button class="nav-action-btn favorite @(currentPrompt.IsFavorite ? "active" : "")" 
+                            @onclick="ToggleFavorite" title="즐겨찾기">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="@(currentPrompt.IsFavorite ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- 메인 콘텐츠 카드 -->
+            <main class="content-card">
+                <!-- 헤더 섹션 -->
+                <header class="card-header">
+                    <div class="header-content">
+                        <div class="category-tag">@currentPrompt.Category</div>
+                        <h1 class="main-title">@currentPrompt.Title</h1>
+                        <p class="main-description">@currentPrompt.Description</p>
+                        
+                        <div class="meta-info">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                @currentPrompt.Author
+                            </div>
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                    <line x1="16" y1="2" x2="16" y2="6"/>
+                                    <line x1="8" y1="2" x2="8" y2="6"/>
+                                    <line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                @currentPrompt.CreatedDate.ToString("yyyy.MM.dd")
+                            </div>
+                        </div>
+                        
+                        @if (currentPrompt.Tags.Any())
+                        {
+                            <div class="tag-container">
+                                @foreach (var tag in currentPrompt.Tags)
+                                {
+                                    <span class="tag-item">#@tag</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                </header>
+
+                <!-- 콘텐츠 섹션 -->
+                <section class="card-content">
+                    <div class="content-header">
+                        <h2 class="content-title">프롬프트 내용</h2>
+                        <button class="copy-button" @onclick="CopyContent">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                            복사하기
+                        </button>
+                    </div>
+                    
+                    <div class="content-body">
+                        @((MarkupString)currentPrompt.HtmlContent)
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+}
+else if (isLoading)
+{
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>프롬프트를 불러오는 중...</p>
+    </div>
+}
+else
+{
+    <div class="error">
+        <h2>프롬프트를 찾을 수 없습니다</h2>
+        <p>요청하신 프롬프트가 존재하지 않거나 삭제되었습니다.</p>
+        <button class="back-btn" @onclick="GoToPrompts">
+            프롬프트 목록으로 이동
+        </button>
+    </div>
+}
+
+<style>
+    /* 메인 컨테이너 */
+    .prompt-detail-container {
+        min-height: 100vh;
+        position: relative;
+        padding: 2rem 1rem;
+    }
+
+    /* 배경 데코레이션 */
+    .background-decoration {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* 메인 컨테이너 */
+    .main-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 네비게이션 */
+    .detail-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+
+    .nav-back-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-back-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .nav-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-action-btn:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-action-btn.favorite.active {
+        background: rgba(255, 107, 107, 0.2);
+        border-color: rgba(255, 107, 107, 0.3);
+        color: #ff6b6b;
+    }
+
+    /* 메인 콘텐츠 카드 */
+    .content-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        box-shadow: 
+            0 20px 40px rgba(0, 0, 0, 0.1),
+            0 1px 3px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+
+    /* 카드 헤더 */
+    .card-header {
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.1) 0%, 
+            rgba(118, 75, 162, 0.1) 100%);
+        padding: 3rem 3rem 2rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .header-content {
+        max-width: none;
+    }
+
+    .category-tag {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .main-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+    }
+
+    .main-description {
+        font-size: 1.25rem;
+        color: #4a5568;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .meta-info {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #718096;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .meta-item svg {
+        opacity: 0.7;
+    }
+
+    .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .tag-item {
+        padding: 0.375rem 0.875rem;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    /* 콘텐츠 섹션 */
+    .card-content {
+        padding: 3rem;
+    }
+
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .content-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .copy-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+
+    .copy-button:hover {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+    }
+
+    /* 콘텐츠 바디 */
+    .content-body {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border-radius: 16px;
+        padding: 2.5rem;
+        line-height: 1.8;
+        font-size: 1.05rem;
+        color: #2d3748;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* 콘텐츠 내부 스타일 */
+    .content-body h1,
+    .content-body h2,
+    .content-body h3,
+    .content-body h4,
+    .content-body h5,
+    .content-body h6 {
+        color: #2d3748;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        line-height: 1.3;
+    }
+
+    .content-body h1 {
+        color: #667eea;
+        font-size: 1.875rem;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+
+    .content-body h2 {
+        color: #764ba2;
+        font-size: 1.5rem;
+    }
+
+    .content-body h3 {
+        color: #667eea;
+        font-size: 1.25rem;
+    }
+
+    .content-body a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid transparent;
+    }
+
+    .content-body a:hover {
+        color: #764ba2;
+        border-bottom-color: #764ba2;
+    }
+
+    .content-body p {
+        margin-bottom: 1.5rem;
+        color: #4a5568;
+    }
+
+    .content-body ul,
+    .content-body ol {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+        color: #4a5568;
+    }
+
+    .content-body li {
+        margin-bottom: 0.5rem;
+        line-height: 1.7;
+    }
+
+    .content-body blockquote {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-left: 4px solid #667eea;
+        margin: 1.5rem 0;
+        padding: 1.5rem 2rem;
+        border-radius: 8px;
+        color: #2d3748;
+        font-style: italic;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .content-body code {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-family: 'SF Mono', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.875em;
+        font-weight: 600;
+    }
+
+    .content-body pre {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        font-family: 'SF Mono', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    }
+
+    .content-body pre code {
+        background: none;
+        color: #e2e8f0;
+        padding: 0;
+        font-weight: 400;
+    }
+
+    /* 로딩 및 에러 상태 개선 */
+    .loading, .error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        margin: 2rem auto;
+        max-width: 600px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 2rem;
+    }
+
+    .loading p {
+        color: #667eea;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .error h2 {
+        color: #e53e3e;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .error p {
+        color: #718096;
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        max-width: 400px;
+    }
+
+    /* 새로운 반응형 스타일 */
+    @@media (max-width: 768px) {
+        .prompt-detail-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .main-container {
+            max-width: none;
+            margin: 0;
+        }
+
+        .detail-navigation {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+            margin-bottom: 1.5rem;
+            padding: 0;
+        }
+
+        .nav-actions {
+            justify-content: center;
+        }
+
+        .card-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .main-title {
+            font-size: 2rem;
+        }
+
+        .main-description {
+            font-size: 1.125rem;
+        }
+
+        .meta-info {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .content-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .content-body {
+            padding: 1.5rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .prompt-detail-container {
+            padding: 0.5rem 0.25rem;
+        }
+
+        .card-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .main-title {
+            font-size: 1.75rem;
+        }
+
+        .main-description {
+            font-size: 1rem;
+        }
+
+        .card-content {
+            padding: 1.5rem 1rem;
+        }
+
+        .content-body {
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        .nav-back-btn {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .nav-action-btn {
+            width: 40px;
+            height: 40px;
+        }
+
+        .copy-button {
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.875rem;
+        }
+
+        .content-body h1 {
+            font-size: 1.5rem;
+        }
+
+        .content-body h2 {
+            font-size: 1.25rem;
+        }
+
+        .content-body h3 {
+            font-size: 1.125rem;
+        }
+    }
+
+    /* 기존 미디어 쿼리 숨기기 */
+    @@media (max-width: 768px) {
+        .prompt-detail {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .prompt-detail {
+            display: none;
+        }
+    }
+
+    /* 인쇄 스타일 */
+    @@media print {
+        .prompt-detail-container {
+            background: white;
+            padding: 1rem;
+        }
+
+        .background-decoration {
+            display: none;
+        }
+
+        .detail-navigation {
+            display: none;
+        }
+
+        .content-card {
+            background: white;
+            box-shadow: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        .category-tag {
+            background: #667eea;
+        }
+
+        .copy-button {
+            display: none;
+        }
+    }
+
+    /* ...existing code... */
+</style>
+
+@code {
+    [Parameter] public string PromptId { get; set; } = string.Empty;
+    
+    private PromptItem? currentPrompt;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPrompt();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(PromptId))
+        {
+            await LoadPrompt();
+        }
+    }
+
+    private async Task LoadPrompt()
+    {
+        isLoading = true;
+        try
+        {
+            currentPrompt = await PromptService.GetPromptByIdAsync(PromptId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"프롬프트 로드 오류: {ex.Message}");
+            currentPrompt = null;
+        }        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+            
+            // 메타 태그 업데이트
+            if (currentPrompt != null)
+            {
+                await UpdatePageMeta();
+            }
+        }
+    }    private async Task CopyPermalink()
+    {
+        var url = GetCurrentUrl();
+        var success = await JSRuntime.InvokeAsync<bool>("copyUrlToClipboard", url);
+        if (success)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "링크가 클립보드에 복사되었습니다!");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "링크 복사에 실패했습니다.");
+        }
+    }
+
+    private async Task CopyContent()
+    {
+        if (currentPrompt != null)
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", currentPrompt.Content);
+            await JSRuntime.InvokeVoidAsync("alert", "프롬프트가 클립보드에 복사되었습니다!");
+        }
+    }
+
+    private async Task ToggleFavorite()
+    {
+        if (currentPrompt != null)
+        {
+            await PromptService.ToggleFavoriteAsync(currentPrompt.Id);
+            currentPrompt.IsFavorite = !currentPrompt.IsFavorite;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        JSRuntime.InvokeVoidAsync("history.back");
+    }
+
+    private void GoToPrompts()
+    {
+        Navigation.NavigateTo("/prompts");
+    }
+
+    private string GetCurrentUrl()
+    {
+        return Navigation.ToAbsoluteUri($"/prompt/{PromptId}").ToString();
+    }
+
+    private string GetSafeDescription(string description)
+    {
+        if (string.IsNullOrEmpty(description))
+            return "MEGAZONE AIR에서 제공하는 AI 프롬프트입니다.";
+        
+        // HTML 태그 제거 및 길이 제한
+        var cleanDescription = System.Text.RegularExpressions.Regex.Replace(description, "<.*?>", "");
+        return cleanDescription.Length > 160 ? cleanDescription.Substring(0, 157) + "..." : cleanDescription;
+    }
+
+    private string GetOgImageUrl()
+    {
+        // 기본 OG 이미지 또는 동적으로 생성된 이미지 URL
+        return Navigation.ToAbsoluteUri("/icon-512.png").ToString();
+    }    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && currentPrompt != null)
+        {
+            await UpdatePageMeta();
+        }
+    }    private async Task UpdatePageMeta()
+    {
+        if (currentPrompt != null)
+        {
+            var title = $"{currentPrompt.Title} - MEGAZONE AIR Prompt";
+            var description = GetSafeDescription(currentPrompt.Description);
+            var url = GetCurrentUrl();
+            var image = GetOgImageUrl();
+
+            await JSRuntime.InvokeVoidAsync("updatePageMeta", title, description, url, image);
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
+}

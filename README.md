@@ -80,6 +80,22 @@ dotnet build --configuration Release
 dotnet publish --configuration Release --output ./publish
 ```
 
+### GitHub Pages 배포
+
+프로젝트는 GitHub Actions를 통해 자동으로 GitHub Pages에 배포됩니다:
+
+1. `main` 브랜치에 푸시하면 자동으로 배포 프로세스가 시작됩니다
+2. GitHub Actions가 .NET 프로젝트를 빌드합니다
+3. SPA 라우팅 문제 해결을 위해 필요한 파일들이 자동으로 설정됩니다:
+   - `404.html`: 서브 페이지 새로고침 시 404 오류 해결
+   - `.nojekyll`: Jekyll 처리 비활성화
+   - `CNAME`: 커스텀 도메인 설정 (`prompts.aiready.ai.kr`)
+4. 커스텀 도메인 `https://prompts.aiready.ai.kr/`로 서비스됩니다
+
+**📌 커스텀 도메인 사용**: 이 프로젝트는 GitHub Pages의 서브디렉토리(`username.github.io/repo-name`) 대신 커스텀 도메인 `https://prompts.aiready.ai.kr/`을 사용합니다. 따라서 base href는 `/`로 유지되며, 별도의 경로 설정이 필요하지 않습니다.
+
+**📌 SPA 라우팅 문제 해결**: GitHub Pages에서 `/prompts` 같은 서브 페이지를 새로고침할 때 404 오류가 발생하는 문제를 해결하기 위해 특별한 리다이렉트 로직이 구현되어 있습니다.
+
 > **📌 배포 시 주의사항**: 새 버전을 배포한 후 사용자들이 기존 페이지를 열어두고 있다면, 자동으로 업데이트 알림이 표시됩니다. 이는 Service Worker가 새 버전을 감지하여 사용자에게 알리는 기능입니다.
 
 ## 📚 주요 기능

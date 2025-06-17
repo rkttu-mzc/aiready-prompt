@@ -451,4 +451,22 @@ public class PromptService
             }
         }
     }
+
+    public async Task ToggleFavoriteAsync(string promptId)
+    {
+        // 로컬 스토리지에 즐겨찾기 정보 저장 (클라이언트 사이드 저장)
+        // 실제 구현에서는 서버나 로컬 DB에 저장할 수 있음
+        var prompt = await GetPromptByIdAsync(promptId);
+        if (prompt != null)
+        {
+            prompt.IsFavorite = !prompt.IsFavorite;
+            // 여기서는 메모리에만 저장하지만, 실제로는 localStorage 등을 활용할 수 있음
+        }
+    }
+
+    public async Task<List<PromptItem>> GetFavoritePromptsAsync()
+    {
+        var allPrompts = await GetAllPromptsAsync();
+        return allPrompts.Where(p => p.IsFavorite).ToList();
+    }
 }

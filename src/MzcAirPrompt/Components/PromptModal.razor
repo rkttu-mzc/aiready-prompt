@@ -22,10 +22,16 @@
                 </div>
                 
                 <p class="prompt-description-full">@Prompt.Description</p>
-                
-                <div class="modal-actions">
-                    <button class="copy-btn" @onclick="async () => await (OnCopyToClipboard?.Invoke(Prompt.Content) ?? Task.CompletedTask)">
-                        📋 프롬프트 복사
+                  <div class="modal-actions">
+                    <button class="copy-btn" @onclick="CopyToClipboard">
+                        @if (isCopied)
+                        {
+                            <span>✅ 복사됨!</span>
+                        }
+                        else
+                        {
+                            <span>📋 프롬프트 복사</span>
+                        }
                     </button>
                     <button class="favorite-btn" @onclick="async () => await (OnToggleFavorite?.Invoke(Prompt) ?? Task.CompletedTask)">
                         @(Prompt.IsFavorite ? "💖" : "🤍") 즐겨찾기
@@ -45,4 +51,21 @@
     [Parameter] public Action? OnClose { get; set; }
     [Parameter] public Func<string, Task>? OnCopyToClipboard { get; set; }
     [Parameter] public Func<PromptItem, Task>? OnToggleFavorite { get; set; }
+
+    private bool isCopied = false;
+
+    private async Task CopyToClipboard()
+    {
+        if (Prompt != null && OnCopyToClipboard != null)
+        {
+            await OnCopyToClipboard.Invoke(Prompt.Content);
+            isCopied = true;
+            StateHasChanged();
+            
+            // 2초 후에 원래 상태로 되돌리기
+            await Task.Delay(2000);
+            isCopied = false;
+            StateHasChanged();
+        }
+    }
 }
