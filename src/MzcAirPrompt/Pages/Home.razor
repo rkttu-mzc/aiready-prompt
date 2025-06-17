@@ -41,10 +41,6 @@
                 <div class="stat-number">@totalCategories</div>
                 <div class="stat-label">카테고리</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-number">@totalTags</div>
-                <div class="stat-label">태그</div>
-            </div>
         </div>
     </section>
 
@@ -101,7 +97,8 @@
             <div class="recent-prompts-grid">                @foreach (var prompt in recentPrompts.Take(3))
                 {
                     <PromptMiniCard Prompt="prompt" 
-                                    OnCardClick="ViewPrompt" />
+                                    OnCardClick="ViewPrompt" 
+                                    OnToggleFavorite="ToggleFavorite" />
                 }</div>
         </section>
     }
@@ -113,7 +110,8 @@
     private string searchTerm = "";
     private int totalPrompts = 0;
     private int totalCategories = 0;
-    private int totalTags = 0;protected override async Task OnInitializedAsync()
+    
+    protected override async Task OnInitializedAsync()
     {
         await LoadQuickStats();
         await LoadData();
@@ -143,7 +141,14 @@
             recentPrompts = allPromptMetadata?
                 .OrderByDescending(p => p.UpdatedDate)
                 .Take(6)
-                .ToList();
+                .ToList();            // 즐겨찾기 상태 복원
+            if (recentPrompts != null)
+            {
+                foreach (var prompt in recentPrompts)
+                {
+                    await LoadFavoriteState(prompt);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -181,6 +186,80 @@
     {
         // Prompts 페이지로 이동하면서 특정 프롬프트를 바로 열도록 함
         Navigation.NavigateTo($"/prompts?promptId={Uri.EscapeDataString(promptId)}");
+    }    private async Task ToggleFavorite(PromptItem prompt)
+    {
+        try
+        {
+            prompt.IsFavorite = !prompt.IsFavorite;
+            
+            // 로컬 스토리지에 즐겨찾기 상태 저장 (Prompts.razor와 동일한 방식 사용)
+            await SaveFavoritesToStorage();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error toggling favorite: {ex.Message}");
+            // 오류 발생 시 상태 되돌리기
+            prompt.IsFavorite = !prompt.IsFavorite;
+        }
+    }    private async Task LoadFavoriteState(PromptItem prompt)
+    {
+        try
+        {
+            var favoritesJson = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "favorites");
+            if (!string.IsNullOrEmpty(favoritesJson))
+            {
+                var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
+                if (favoriteIds != null)
+                {
+                    prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
+                }
+            }
+            else
+            {
+                prompt.IsFavorite = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error restoring favorite state for {prompt.Id}: {ex.Message}");
+            prompt.IsFavorite = false;
+        }
+    }
+
+    private async Task SaveFavoritesToStorage()
+    {
+        try
+        {
+            var favoriteIds = new List<string>();
+            
+            // 현재 페이지의 프롬프트에서 즐겨찾기 추출
+            if (recentPrompts != null)
+            {
+                favoriteIds.AddRange(recentPrompts.Where(p => p.IsFavorite).Select(p => p.Id));
+            }
+            
+            // 기존 저장된 즐겨찾기 목록 가져오기
+            var existingFavoritesJson = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "favorites");
+            if (!string.IsNullOrEmpty(existingFavoritesJson))
+            {
+                var existingFavoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(existingFavoritesJson);
+                if (existingFavoriteIds != null)
+                {
+                    // 기존 즐겨찾기 중 현재 페이지에 없는 것들 유지
+                    var currentPageIds = recentPrompts?.Select(p => p.Id).ToHashSet() ?? new HashSet<string>();
+                    favoriteIds.AddRange(existingFavoriteIds.Where(id => !currentPageIds.Contains(id)));
+                }
+            }
+
+            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds.Distinct().ToList());
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "favorites", favoritesJson);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
+        }
     }
 
     private string GetCategoryIcon(string category)

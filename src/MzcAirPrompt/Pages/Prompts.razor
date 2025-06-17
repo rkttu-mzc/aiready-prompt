@@ -57,10 +57,9 @@
                     <span class="loading-more">더 불러오는 중...</span>
                 }
             </div>
-              <div class="prompts-grid">
-                @foreach (var prompt in displayedPrompts)
+              <div class="prompts-grid">                @foreach (var prompt in displayedPrompts)
                 {
-                    <PromptCard Prompt="prompt" OnCardClick="ViewPrompt" />
+                    <PromptCard Prompt="prompt" OnCardClick="ViewPrompt" OnToggleFavorite="ToggleFavorite" />
                 }
             </div>
         }
@@ -120,6 +119,7 @@
         // URL 파라미터 처리
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query;
+        string? promptIdToShow = null;
 
         if (!string.IsNullOrEmpty(query))
         {
@@ -142,9 +142,7 @@
                     }
                     else if (key == "promptId")
                     {
-                        // 특정 프롬프트 ID가 전달된 경우, 해당 프롬프트를 바로 표시
-                        await ShowPromptById(value);
-                        return; // 더 이상 진행하지 않고 프롬프트 모달만 표시
+                        promptIdToShow = value;
                     }
                 }
             }
@@ -152,6 +150,26 @@
 
         await LoadInitialData();
         await LoadData();
+        
+        // 특정 프롬프트 ID가 전달된 경우, 로딩 완료 후 해당 프롬프트를 표시
+        if (!string.IsNullOrEmpty(promptIdToShow))
+        {
+            selectedPrompt = allPrompts?.FirstOrDefault(p => p.Id == promptIdToShow);
+            
+            if (selectedPrompt == null)
+            {
+                // 프롬프트를 찾지 못한 경우, 개별 로드 시도
+                selectedPrompt = await PromptService.GetPromptByIdAsync(promptIdToShow);
+                
+                if (selectedPrompt != null)
+                {
+                    // 즐겨찾기 상태 복원
+                    await RestoreFavoriteState(selectedPrompt);
+                }
+            }
+            
+            StateHasChanged();
+        }
     }
 
     private async Task LoadInitialData()
@@ -426,38 +444,7 @@
         {
             Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
         }
-    }
-
-    private async Task ShowPromptById(string promptId)
-    {
-        try
-        {
-            // 카테고리 정보를 먼저 로드
-            await LoadInitialData();
-            
-            // 특정 프롬프트만 로드
-            selectedPrompt = await PromptService.GetPromptByIdAsync(promptId);
-            
-            if (selectedPrompt != null)
-            {
-                // 즐겨찾기 상태 복원
-                await LoadFavoritesFromStorage();
-                StateHasChanged();
-            }
-            else
-            {
-                // 프롬프트를 찾지 못한 경우 전체 목록으로 이동
-                await LoadData();
-            }        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading specific prompt: {ex.Message}");
-            // 오류 발생 시 전체 목록으로 이동
-            await LoadData();
-        }
-    }
-
-    public void Dispose()
+    }    public void Dispose()
     {
         _loadingCancellationTokenSource?.Cancel();
         _loadingCancellationTokenSource?.Dispose();

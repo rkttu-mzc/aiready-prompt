@@ -573,6 +573,34 @@ body {
     transform: scale(0.95);
 }
 
+/* PromptCard용 즐겨찾기 버튼 */
+.prompt-card .favorite-btn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    min-width: auto;
+    box-shadow: none;
+}
+
+.prompt-card .favorite-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+.prompt-card .favorite-btn:active {
+    transform: scale(0.95);
+}
+
 .prompt-header {
     display: flex;
     justify-content: space-between;
