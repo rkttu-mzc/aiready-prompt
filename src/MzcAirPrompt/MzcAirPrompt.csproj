@@ -20,8 +20,4 @@
 		<AdditionalFiles Include="wwwroot\prompts\**\*.md" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Content Remove="wwwroot\prompts\development\code-reviewer.md" />
-	</ItemGroup>
-
 </Project>
