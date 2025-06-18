@@ -109,11 +109,36 @@
     private string searchTerm = "";
     private int totalPrompts = 0;
     private int totalCategories = 0;
-    
-    protected override async Task OnInitializedAsync()
+      protected override async Task OnInitializedAsync()
     {
+        // Query string에서 공유 파라미터 체크
+        await CheckForSharedPrompt();
+        
         await LoadQuickStats();
         await LoadData();
+    }
+
+    private Task CheckForSharedPrompt()
+    {
+        try
+        {
+            var uri = new Uri(Navigation.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var sharePromptId = query["share"];
+            
+            if (!string.IsNullOrEmpty(sharePromptId))
+            {
+                // 공유 URL인 경우 해당 프롬프트 페이지로 리다이렉트
+                Navigation.NavigateTo($"/prompt/{sharePromptId}", replace: true);
+                return Task.CompletedTask;;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing shared URL: {ex.Message}");
+        }
+
+        return Task.CompletedTask;
     }
 
     private async Task LoadQuickStats()

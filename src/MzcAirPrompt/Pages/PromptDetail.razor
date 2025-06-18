@@ -706,11 +706,11 @@ else
     private void GoToPrompts()
     {
         Navigation.NavigateTo("/prompts");
-    }
-
-    private string GetCurrentUrl()
+    }    private string GetCurrentUrl()
     {
-        return Navigation.ToAbsoluteUri($"/prompt/{PromptId}").ToString();
+        // Query string 방식의 공유 URL 생성
+        var baseUri = Navigation.ToAbsoluteUri("/");
+        return $"{baseUri}?share={PromptId}";
     }
 
     private string GetSafeDescription(string description)
