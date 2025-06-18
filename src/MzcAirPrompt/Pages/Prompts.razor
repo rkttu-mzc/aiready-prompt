@@ -140,7 +140,9 @@
             }
         }        await LoadInitialData();
         await LoadData();
-    }    private async Task LoadInitialData()
+    }
+    
+    private async Task LoadInitialData()
     {
         try
         {
@@ -155,7 +157,8 @@
             Console.WriteLine($"Error loading initial data: {ex.Message}");
         }
     }
-      private async Task LoadData()
+    
+    private async Task LoadData()
     {
         isLoading = true;
         StateHasChanged();
@@ -327,7 +330,9 @@
         {
             Console.WriteLine($"Failed to restore favorite state for {prompt.Id}: {ex.Message}");
         }
-    }    private async Task ToggleFavorite(PromptItem prompt)
+    }
+    
+    private async Task ToggleFavorite(PromptItem prompt)
     {
         prompt.IsFavorite = !prompt.IsFavorite;
 
@@ -344,7 +349,8 @@
             StateHasChanged();
         }
     }
-      private async Task LoadFavoritesFromStorage()
+    
+    private async Task LoadFavoritesFromStorage()
     {
         try
         {
@@ -370,7 +376,8 @@
             Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
         }
     }
-      private async Task SaveFavoritesToStorage()
+    
+    private async Task SaveFavoritesToStorage()
     {
         try
         {

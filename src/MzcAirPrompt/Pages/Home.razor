@@ -15,7 +15,8 @@
             <p class="hero-subtitle">
                 AI 시대를 위한 최고의 프롬프트 컬렉션<br>
                 창의적인 아이디어와 효율적인 작업을 위한 완벽한 도구
-            </p>            <!-- Quick Search -->
+            </p>
+            <!-- Quick Search -->
             <div class="hero-search">
                 <div class="search-container">
                     <input @bind="searchTerm" @bind:event="oninput" @onkeydown="OnSearchKeyPress"
@@ -90,10 +91,11 @@
 
     <!-- Recent Prompts Section -->
     @if (recentPrompts?.Any() == true)
-    {        <section class="recent-section">
+    {
+        <section class="recent-section">
             <h2 class="section-title">최근 업데이트된 프롬프트</h2>
             <div class="recent-prompts-grid">
-                @foreach (var prompt in recentPrompts.Take(3))
+                @foreach (var prompt in recentPrompts.Take(6))
                 {
                     <PromptMiniCard Prompt="prompt" 
                                     OnCardClick="ViewPrompt" 
@@ -109,7 +111,8 @@
     private string searchTerm = "";
     private int totalPrompts = 0;
     private int totalCategories = 0;
-      protected override async Task OnInitializedAsync()
+    
+    protected override async Task OnInitializedAsync()
     {
         // Query string에서 공유 파라미터 체크
         await CheckForSharedPrompt();
@@ -182,7 +185,9 @@
         }
 
         StateHasChanged();
-    }    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    }
+    
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
     {
         Console.WriteLine($"Key pressed: {e.Key}");
         if (e.Key == "Enter")
@@ -217,7 +222,8 @@
     {
         Navigation.NavigateTo("/prompts");
     }
-      private void ViewPrompt(string promptId)
+    
+    private void ViewPrompt(string promptId)
     {
         // PromptDetail 페이지로 바로 이동
         Navigation.NavigateTo($"/prompt/{Uri.EscapeDataString(promptId)}");
