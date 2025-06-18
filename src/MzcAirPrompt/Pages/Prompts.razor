@@ -58,10 +58,9 @@
                     var prompt = displayedPrompts[i];
                     var batchIndex = i; // 배치 인덱스 계산
                     <PromptCard Prompt="prompt" 
-                               BatchIndex="batchIndex" 
-                               ShowAnimation="true"
-                               OnCardClick="ViewPrompt" 
-                               OnToggleFavorite="ToggleFavorite" />
+                           BatchIndex="batchIndex" 
+                           ShowAnimation="true"
+                           OnToggleFavorite="ToggleFavorite" />
                 }
             </div>
         }
@@ -76,20 +75,14 @@
     </main>
 </div>
 
-<PromptModal Prompt="selectedPrompt" 
-             OnClose="CloseModal"
-             OnCopyToClipboard="CopyToClipboard"
-             OnToggleFavorite="ToggleFavorite" />
-
 @code
 {
     private List<PromptItem>? allPrompts;
     private List<PromptItem> displayedPrompts = new();
     private List<string>? categories;
     private string searchTerm = string.Empty;
-    private string _selectedCategory = string.Empty;
-    private bool showFavoritesOnly = false;    private bool isLoading = true;
-    private PromptItem? selectedPrompt;
+    private string _selectedCategory = string.Empty;    private bool showFavoritesOnly = false;
+    private bool isLoading = true;
 
     private CancellationTokenSource? _loadingCancellationTokenSource;private string selectedCategory
     {
@@ -118,11 +111,9 @@
     }
     
     protected override async Task OnInitializedAsync()
-    {
-        // URL 파라미터 처리
+    {        // URL 파라미터 처리
         var uri = new Uri(Navigation.Uri);
         var query = uri.Query;
-        string? promptIdToShow = null;
 
         if (!string.IsNullOrEmpty(query))
         {
@@ -143,36 +134,10 @@
                     {
                         _selectedCategory = value;
                     }
-                    else if (key == "promptId")
-                    {
-                        promptIdToShow = value;
-                    }
                 }
             }
-        }
-
-        await LoadInitialData();
+        }        await LoadInitialData();
         await LoadData();
-        
-        // 특정 프롬프트 ID가 전달된 경우, 로딩 완료 후 해당 프롬프트를 표시
-        if (!string.IsNullOrEmpty(promptIdToShow))
-        {
-            selectedPrompt = allPrompts?.FirstOrDefault(p => p.Id == promptIdToShow);
-            
-            if (selectedPrompt == null)
-            {
-                // 프롬프트를 찾지 못한 경우, 개별 로드 시도
-                selectedPrompt = await PromptService.GetPromptByIdAsync(promptIdToShow);
-                
-                if (selectedPrompt != null)
-                {
-                    // 즐겨찾기 상태 복원
-                    await RestoreFavoriteState(selectedPrompt);
-                }
-            }
-            
-            StateHasChanged();
-        }
     }
 
     private async Task LoadInitialData()
@@ -360,35 +325,7 @@
         {
             Console.WriteLine($"Failed to restore favorite state for {prompt.Id}: {ex.Message}");
         }
-    }
-
-    private void ViewPrompt(string promptId)
-    {
-        selectedPrompt = allPrompts?.FirstOrDefault(p => p.Id == promptId);
-        StateHasChanged();
-    }
-
-    private void CloseModal()
-    {
-        selectedPrompt = null;
-        StateHasChanged();
-    }
-
-    private async Task CopyToClipboard(string content)
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", content);
-            // 간단한 알림을 위해 콘솔에 로그 출력 (실제로는 토스트 메시지 등을 사용할 수 있습니다)
-            Console.WriteLine("프롬프트가 클립보드에 복사되었습니다.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"클립보드 복사 실패: {ex.Message}");
-        }
-    }
-
-    private async Task ToggleFavorite(PromptItem prompt)
+    }    private async Task ToggleFavorite(PromptItem prompt)
     {
         prompt.IsFavorite = !prompt.IsFavorite;
 
@@ -405,8 +342,7 @@
             StateHasChanged();
         }
     }
-    
-    private async Task LoadFavoritesFromStorage()
+      private async Task LoadFavoritesFromStorage()
     {
         try
         {
@@ -424,12 +360,6 @@
                             prompt.IsFavorite = favoriteIds.Contains(prompt.Id);
                         }
                     }
-                    
-                    // 선택된 프롬프트가 있는 경우
-                    if (selectedPrompt != null)
-                    {
-                        selectedPrompt.IsFavorite = favoriteIds.Contains(selectedPrompt.Id);
-                    }
                 }
             }
         }
@@ -438,8 +368,7 @@
             Console.WriteLine($"Failed to load favorites from storage: {ex.Message}");
         }
     }
-    
-    private async Task SaveFavoritesToStorage()
+      private async Task SaveFavoritesToStorage()
     {
         try
         {
@@ -449,18 +378,6 @@
             if (allPrompts != null)
             {
                 favoriteIds.AddRange(allPrompts.Where(p => p.IsFavorite).Select(p => p.Id));
-            }
-            
-            // 선택된 프롬프트가 즐겨찾기인 경우 추가 (중복 방지)
-            if (selectedPrompt?.IsFavorite == true && !favoriteIds.Contains(selectedPrompt.Id))
-            {
-                favoriteIds.Add(selectedPrompt.Id);
-            }
-            
-            // 선택된 프롬프트가 즐겨찾기에서 제거된 경우 제거
-            if (selectedPrompt?.IsFavorite == false)
-            {
-                favoriteIds.Remove(selectedPrompt.Id);
             }
 
             var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds.Distinct().ToList());
