@@ -162,25 +162,45 @@
     {
         "relPath": "business",
         "fileName": "web-content-writing.md"
-    },
-    {
-        "relPath": "business",
-        "fileName": "x-market-research.md"
-    },
-    {
-        "relPath": "business",
-        "fileName": "x-press-release-catchphrase.md"
-    },
-    {
-        "relPath": "business",
-        "fileName": "x-sns-marketing.md"
-    },
-    {
-        "relPath": "business",
-        "fileName": "x-user-interview.md"
     },    {
         "relPath": "business",
-        "fileName": "x-website-content.md"
+        "fileName": "market-research-items.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "product-market-research.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "press-release-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "catchphrase-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "sns-post-ideas.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "sns-post-writing.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "user-interview-items.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "group-interview.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "website-structure.md"
+    },
+    {
+        "relPath": "business",
+        "fileName": "keyword-content-writing.md"
     },
     {
         "relPath": "business",
@@ -201,10 +221,6 @@
     {
         "relPath": "development",
         "fileName": "chart-format-suggestion.md"
-    },
-    {
-        "relPath": "development",
-        "fileName": "code-reviewer.md"
     },
     {
         "relPath": "development",
