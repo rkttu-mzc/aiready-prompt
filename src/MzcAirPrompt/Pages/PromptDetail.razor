@@ -646,24 +646,17 @@ else
         }
         finally
         {
-            isLoading = false;
-            StateHasChanged();
-            
-            // 메타 태그 업데이트
-            if (currentPrompt != null)
-            {
-                await UpdatePageMeta();
-            }
+            isLoading = false;            StateHasChanged();
         }
     }private async Task CopyPermalink()
     {
-        var url = GetCurrentUrl();
-        var success = await JSRuntime.InvokeAsync<bool>("copyUrlToClipboard", url);
-        if (success)
+        var currentUrl = Navigation.Uri;
+        try
         {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", currentUrl);
             await JSRuntime.InvokeVoidAsync("alert", "링크가 클립보드에 복사되었습니다!");
         }
-        else
+        catch
         {
             await JSRuntime.InvokeVoidAsync("alert", "링크 복사에 실패했습니다.");
         }
@@ -701,50 +694,13 @@ else
     private void GoBack()
     {
         JSRuntime.InvokeVoidAsync("history.back");
-    }
-
-    private void GoToPrompts()
+    }    private void GoToPrompts()
     {
         Navigation.NavigateTo("/prompts");
-    }    private string GetCurrentUrl()
+    }protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Query string 방식의 공유 URL 생성
-        var baseUri = Navigation.ToAbsoluteUri("/");
-        return $"{baseUri}?share={PromptId}";
-    }
-
-    private string GetSafeDescription(string description)
-    {
-        if (string.IsNullOrEmpty(description))
-            return "MEGAZONE AIR에서 제공하는 AI 프롬프트입니다.";
-        
-        // HTML 태그 제거 및 길이 제한
-        var cleanDescription = System.Text.RegularExpressions.Regex.Replace(description, "<.*?>", "");
-        return cleanDescription.Length > 160 ? cleanDescription.Substring(0, 157) + "..." : cleanDescription;
-    }
-
-    private string GetOgImageUrl()
-    {
-        // 기본 OG 이미지 또는 동적으로 생성된 이미지 URL
-        return Navigation.ToAbsoluteUri("/icon-512.png").ToString();
-    }    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && currentPrompt != null)
-        {
-            await UpdatePageMeta();
-        }
-    }    private async Task UpdatePageMeta()
-    {
-        if (currentPrompt != null)
-        {
-            var title = $"{currentPrompt.Title} - MEGAZONE AIR Prompt";
-            var description = GetSafeDescription(currentPrompt.Description);
-            var url = GetCurrentUrl();
-            var image = GetOgImageUrl();            await JSRuntime.InvokeVoidAsync("updatePageMeta", title, description, url, image);
-        }
-    }
-
-    private async Task LoadFavoriteState()
+        // 첫 렌더링 후 추가 로직이 필요하면 여기에 추가
+    }    private async Task LoadFavoriteState()
     {
         try
         {
