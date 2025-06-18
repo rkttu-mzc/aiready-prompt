@@ -10,14 +10,10 @@
     <header class="gallery-header">
         <h1 class="gallery-title">📚 프롬프트 목록</h1>
         <p class="gallery-subtitle">모든 AI 프롬프트를 한눈에 확인하세요</p>
-        
-        <div class="search-section">
+          <div class="search-section">
             <div class="search-container">
                 <input @bind="searchTerm" @oninput="OnSearchInput" 
                        placeholder="프롬프트 검색..." class="search-input" />
-                <button class="search-btn" @onclick="SearchPrompts">
-                    🔍
-                </button>
             </div>
               <div class="filter-section">
                 <select @bind="selectedCategory" class="category-filter">
@@ -275,16 +271,7 @@
         
         // 기존 로딩 취소
         _loadingCancellationTokenSource?.Cancel();
-        
-        // 검색어가 변경되면 즉시 재필터링
-        if (allPrompts != null)
-        {
-            ApplyFilters();
-        }
-    }
-
-    private void SearchPrompts()
-    {
+          // 검색어가 변경되면 즉시 재필터링
         if (allPrompts != null)
         {
             ApplyFilters();

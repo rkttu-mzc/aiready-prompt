@@ -15,12 +15,10 @@
             <p class="hero-subtitle">
                 AI 시대를 위한 최고의 프롬프트 컬렉션<br>
                 창의적인 아이디어와 효율적인 작업을 위한 완벽한 도구
-            </p>
-            
-            <!-- Quick Search -->
+            </p>            <!-- Quick Search -->
             <div class="hero-search">
                 <div class="search-container">
-                    <input @bind="searchTerm" @onkeypress="OnSearchKeyPress"
+                    <input @bind="searchTerm" @bind:event="oninput" @onkeydown="OnSearchKeyPress"
                            placeholder="원하는 프롬프트를 검색해보세요..." 
                            class="search-input-large" />
                     <button class="search-btn-large" @onclick="PerformSearch">
@@ -159,21 +157,29 @@
         }
 
         StateHasChanged();
-    }
-    
-    private void OnSearchKeyPress(KeyboardEventArgs e)
+    }    private async Task OnSearchKeyPress(KeyboardEventArgs e)
     {
+        Console.WriteLine($"Key pressed: {e.Key}");
         if (e.Key == "Enter")
         {
+            Console.WriteLine("Enter key detected, performing search");
+            await Task.Yield(); // UI 업데이트 대기
             PerformSearch();
         }
     }
 
     private void PerformSearch()
     {
+        Console.WriteLine($"Performing search with term: '{searchTerm}'");
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            Navigation.NavigateTo($"/prompts?search={Uri.EscapeDataString(searchTerm)}");
+            var url = $"/prompts?search={Uri.EscapeDataString(searchTerm)}";
+            Console.WriteLine($"Navigating to: {url}");
+            Navigation.NavigateTo(url);
+        }
+        else
+        {
+            Console.WriteLine("Search term is empty, not navigating");
         }
     }
 
