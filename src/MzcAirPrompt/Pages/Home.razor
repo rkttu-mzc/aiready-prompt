@@ -186,11 +186,10 @@
     {
         Navigation.NavigateTo("/prompts");
     }
-    
-    private void ViewPrompt(string promptId)
+      private void ViewPrompt(string promptId)
     {
-        // Prompts 페이지로 이동하면서 특정 프롬프트를 바로 열도록 함
-        Navigation.NavigateTo($"/prompts?promptId={Uri.EscapeDataString(promptId)}");
+        // PromptDetail 페이지로 바로 이동
+        Navigation.NavigateTo($"/prompt/{Uri.EscapeDataString(promptId)}");
     }
     
     private async Task ToggleFavorite(PromptItem prompt)
