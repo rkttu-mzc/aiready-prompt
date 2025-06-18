@@ -48,11 +48,12 @@
         else if (displayedPrompts?.Any() == true)
         {
             <div class="prompts-stats">
-                <p>총 @(allPrompts?.Count ?? 0)개 중 @(displayedPrompts.Count)개의 프롬프트</p>                @if (isLoading)
+                <p>총 @(totalPromptCount)개 중 @(displayedPrompts.Count)개의 프롬프트</p>
+                @if (isLoading)
                 {
                     <span class="loading-more">더 불러오는 중...</span>
                 }
-            </div>            <div class="prompts-grid">
+            </div><div class="prompts-grid">
                 @for (int i = 0; i < displayedPrompts.Count; i++)
                 {
                     var prompt = displayedPrompts[i];
@@ -83,6 +84,7 @@
     private string searchTerm = string.Empty;
     private string _selectedCategory = string.Empty;    private bool showFavoritesOnly = false;
     private bool isLoading = true;
+    private int totalPromptCount = 0;
 
     private CancellationTokenSource? _loadingCancellationTokenSource;private string selectedCategory
     {
@@ -138,14 +140,14 @@
             }
         }        await LoadInitialData();
         await LoadData();
-    }
-
-    private async Task LoadInitialData()
+    }    private async Task LoadInitialData()
     {
         try
         {
             // 카테고리 목록을 먼저 빠르게 로드 (매니페스트만 사용)
             categories = await PromptService.GetCategoriesFromManifestAsync();
+            // 매니페스트에서 총 프롬프트 개수 가져오기
+            totalPromptCount = await PromptService.GetPromptCountAsync();
             StateHasChanged(); // UI 업데이트로 카테고리 필터를 빠르게 표시
         }
         catch (Exception ex)
