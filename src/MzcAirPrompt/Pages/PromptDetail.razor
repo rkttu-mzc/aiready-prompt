@@ -688,20 +688,25 @@ else
         {
             await LoadPrompt();
         }
-    }
-
-    private async Task LoadPrompt()
+    }    private async Task LoadPrompt()
     {
         isLoading = true;
         try
         {
             currentPrompt = await PromptService.GetPromptByIdAsync(PromptId);
+            
+            // 즐겨찾기 상태 복원
+            if (currentPrompt != null)
+            {
+                await LoadFavoriteState();
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"프롬프트 로드 오류: {ex.Message}");
             currentPrompt = null;
-        }        finally
+        }
+        finally
         {
             isLoading = false;
             StateHasChanged();
@@ -712,7 +717,7 @@ else
                 await UpdatePageMeta();
             }
         }
-    }    private async Task CopyPermalink()
+    }private async Task CopyPermalink()
     {
         var url = GetCurrentUrl();
         var success = await JSRuntime.InvokeAsync<bool>("copyUrlToClipboard", url);
@@ -733,15 +738,25 @@ else
             await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", currentPrompt.Content);
             await JSRuntime.InvokeVoidAsync("alert", "프롬프트가 클립보드에 복사되었습니다!");
         }
-    }
-
-    private async Task ToggleFavorite()
+    }    private async Task ToggleFavorite()
     {
         if (currentPrompt != null)
         {
-            await PromptService.ToggleFavoriteAsync(currentPrompt.Id);
-            currentPrompt.IsFavorite = !currentPrompt.IsFavorite;
-            StateHasChanged();
+            try
+            {
+                currentPrompt.IsFavorite = !currentPrompt.IsFavorite;
+                
+                // localStorage에 즐겨찾기 상태 저장 (다른 페이지들과 동일한 방식 사용)
+                await SaveFavoritesToStorage();
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error toggling favorite: {ex.Message}");
+                // 오류 발생 시 상태 되돌리기
+                currentPrompt.IsFavorite = !currentPrompt.IsFavorite;
+            }
         }
     }
 
@@ -787,9 +802,73 @@ else
             var title = $"{currentPrompt.Title} - MEGAZONE AIR Prompt";
             var description = GetSafeDescription(currentPrompt.Description);
             var url = GetCurrentUrl();
-            var image = GetOgImageUrl();
+            var image = GetOgImageUrl();            await JSRuntime.InvokeVoidAsync("updatePageMeta", title, description, url, image);
+        }
+    }
 
-            await JSRuntime.InvokeVoidAsync("updatePageMeta", title, description, url, image);
+    private async Task LoadFavoriteState()
+    {
+        try
+        {
+            var favoritesJson = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "favorites");
+            if (!string.IsNullOrEmpty(favoritesJson))
+            {
+                var favoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(favoritesJson);
+                if (favoriteIds != null && currentPrompt != null)
+                {
+                    currentPrompt.IsFavorite = favoriteIds.Contains(currentPrompt.Id);
+                }
+            }
+            else if (currentPrompt != null)
+            {
+                currentPrompt.IsFavorite = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading favorite state: {ex.Message}");
+            if (currentPrompt != null)
+            {
+                currentPrompt.IsFavorite = false;
+            }
+        }
+    }
+
+    private async Task SaveFavoritesToStorage()
+    {
+        try
+        {
+            // 기존 즐겨찾기 목록 가져오기
+            var existingFavoritesJson = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "favorites");
+            var favoriteIds = new List<string>();
+            
+            if (!string.IsNullOrEmpty(existingFavoritesJson))
+            {
+                var existingFavoriteIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(existingFavoritesJson);
+                if (existingFavoriteIds != null)
+                {
+                    favoriteIds = existingFavoriteIds.ToList();
+                }
+            }
+
+            if (currentPrompt != null)
+            {
+                if (currentPrompt.IsFavorite && !favoriteIds.Contains(currentPrompt.Id))
+                {
+                    favoriteIds.Add(currentPrompt.Id);
+                }
+                else if (!currentPrompt.IsFavorite && favoriteIds.Contains(currentPrompt.Id))
+                {
+                    favoriteIds.Remove(currentPrompt.Id);
+                }
+            }
+
+            var favoritesJson = System.Text.Json.JsonSerializer.Serialize(favoriteIds.Distinct().ToList());
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "favorites", favoritesJson);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to save favorites to storage: {ex.Message}");
         }
     }
 
