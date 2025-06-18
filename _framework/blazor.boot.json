@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "MzcAirPrompt",
   "resources": {
-    "hash": "sha256-vkgPU8S39HddwmiFUXenduuZRR5DTwwkrK+aB0s1TUc=",
+    "hash": "sha256-Xs4jSxSrQ6YYrnrd6tf8TJFb2BfYXYAloxBlKyzNBjI=",
     "fingerprinting": {
       "Markdig.57ujnljo5y.wasm": "Markdig.wasm",
       "Microsoft.AspNetCore.Components.ucyre5pnyn.wasm": "Microsoft.AspNetCore.Components.wasm",
@@ -40,7 +40,7 @@
       "System.Threading.ik9qxdinuq.wasm": "System.Threading.wasm",
       "System.Web.HttpUtility.3ehg3jgpuh.wasm": "System.Web.HttpUtility.wasm",
       "System.Private.CoreLib.kp37htvp9y.wasm": "System.Private.CoreLib.wasm",
-      "MzcAirPrompt.b93z5r8j5y.wasm": "MzcAirPrompt.wasm",
+      "MzcAirPrompt.jzmobrhb3y.wasm": "MzcAirPrompt.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.rtblh4npr3.js": "dotnet.native.js",
       "dotnet.native.aqhezbunpl.wasm": "dotnet.native.wasm",
@@ -103,7 +103,7 @@
       "System.Text.RegularExpressions.7fvu4vam4r.wasm": "sha256-k3q2N4TFVEtsPhlI3niNl7CQVBgHsPRhzYQApaT4p5Q=",
       "System.Threading.ik9qxdinuq.wasm": "sha256-Dlio8i22EH3GTsu2OrgUi1hkD2MThp3g0hHb2mkkv8Q=",
       "System.Web.HttpUtility.3ehg3jgpuh.wasm": "sha256-CwuaWh1oo2hLyU9/oGKvJC6rdOd3BbjrXl5nUwcWW4U=",
-      "MzcAirPrompt.b93z5r8j5y.wasm": "sha256-wVOTkQFflIqHaXC/s34Zj8RvZ2XQtyqEkGdIAEvjRo0="
+      "MzcAirPrompt.jzmobrhb3y.wasm": "sha256-oW6NASGWpf650aOdIXN83WWKjkhDqW/7jCKDB4fZWB8="
     }
   },
   "cacheBootResources": true,
